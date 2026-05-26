@@ -89,7 +89,30 @@
         <input type="text" id="newMemo" placeholder="메모/상담내용" style="grid-column: span 2;">
     </div>
     <div class="btn-row">
-        <button class="btn add-btn" onclick="addNewRow()">새 데이터 추가</button>
+
+    <button class="btn"
+    onclick="googleLogin()"
+    style="background:#222; color:white;">
+
+        구글 로그인
+
+    </button>
+
+    <button class="btn"
+    onclick="logout()"
+    style="background:#999; color:white;">
+
+        로그아웃
+
+    </button>
+
+    <button class="btn add-btn"
+    onclick="addNewRow()">
+
+        새 데이터 추가
+
+    </button>
+
     </div>
 </div>
 
@@ -120,21 +143,40 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { initializeApp } 
+        from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc} 
+        from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyC8CiV8yujqwa0ovgwQ8_Y47ucHlSzQcIE",
-        authDomain: "my-client-dc700.firebaseapp.com",
-        projectId: "my-client-dc700",
-        storageBucket: "my-client-dc700.firebasestorage.app",
-        messagingSenderId: "117891017561",
-        appId: "1:117891017561:web:e2a5266154d112c568fa48"
-    };
+    apiKey: "AIzaSyC8CiV8yujqwa0ovgwQ8_Y47ucHlSzQcIE",
+    authDomain: "my-client-dc700.firebaseapp.com",
+    projectId: "my-client-dc700",
+    storageBucket: "my-client-dc700.firebasestorage.app",
+    messagingSenderId: "117891017561",
+    appId: "1:117891017561:web:e2a5266154d112c568fa48"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const customerRef = collection(db, "customers");
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const customerRef =
+    collection(db, "customers");
+
+const auth = getAuth(app);
+
+const provider =
+    new GoogleAuthProvider();
     
     let customerData = [];
     let activeRowIndex = null;
@@ -143,10 +185,12 @@
     const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '부재': 3, '보류': 4, '취소': 5, '취소(AS)': 6 };
 
     window.onload = async function() {
+
         checkNotice();
-        document.getElementById('newDate').valueAsDate = new Date();
-        await loadCustomers();
-        renderTable();
+
+        document.getElementById('newDate').valueAsDate =
+            new Date();
+
         initModalOptions();
     };
 
@@ -278,6 +322,75 @@
             renderTable();
         }
     };
+
+    window.googleLogin = async function () {
+
+    try {
+
+        const result =
+            await signInWithPopup(auth, provider);
+
+        const user = result.user;
+
+        if(user.email !== "choae000@gmail.com"){
+
+            alert("허용된 계정이 아닙니다.");
+
+            await signOut(auth);
+
+            return;
+        }
+
+        alert("로그인 성공");
+
+        await loadCustomers();
+
+        renderTable();
+
+    } catch(error){
+
+        console.error(error);
+
+        alert("로그인 실패");
+    }
+};
+
+window.logout = async function(){
+
+    await signOut(auth);
+
+    customerData = [];
+
+    renderTable();
+
+    alert("로그아웃 완료");
+};
+
+onAuthStateChanged(auth, async(user)=>{
+
+    if(user){
+
+        if(user.email === "choae000@gmail.com"){
+
+            await loadCustomers();
+
+            renderTable();
+
+        }else{
+
+            await signOut(auth);
+
+            alert("허용되지 않은 계정");
+        }
+
+    }else{
+
+        customerData = [];
+
+        renderTable();
+    }
+});
+    
 </script>
 </body>
 </html>
