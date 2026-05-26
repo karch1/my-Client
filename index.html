@@ -72,7 +72,7 @@
     <div style="font-weight: bold; margin-bottom: 10px; font-size: 16px;">DB 고객 관리</div>
     <div class="search-row">
         <span style="align-self: center; font-weight: bold;">데이터 검색:</span>
-        <input type="text" id="searchInput" placeholder="고객명, 전화번호, 메모 내용으로 검색..." onkeyup="renderTable()">
+        <input type="text" id="searchInput" placeholder="고객명, 전화번호, 메모 내용으로 검색..." onkeyup="currentPage=1; renderTable()">
     </div>
     <div class="input-grid">
         <input type="date" id="newDate">
@@ -129,6 +129,15 @@
         <tbody id="tableBody"></tbody>
     </table>
 </div>
+
+    <div id="pagination"
+style="
+display:flex;
+justify-content:center;
+gap:6px;
+margin-top:15px;
+flex-wrap:wrap;
+"></div>
 
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
@@ -224,6 +233,8 @@ const provider =
     let customerData = [];
     let activeRowIndex = null;
     let selectedStatus = "";
+    let currentPage = 1;
+    const rowsPerPage = 10;
     const statuses = ['계약자', '2차성공', '약속잡음', '부재', '보류', '취소', '취소(AS)'];
     const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '부재': 3, '보류': 4, '취소': 5, '취소(AS)': 6 };
 
@@ -302,36 +313,179 @@ const provider =
     }
 
     window.renderTable = function() {
-        const tbody = document.getElementById('tableBody');
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        tbody.innerHTML = "";
 
-        customerData.forEach((item, index) => {
-            if (searchTerm && !JSON.stringify(item).toLowerCase().includes(searchTerm)) return;
+    const tbody =
+        document.getElementById('tableBody');
 
-            const tr = document.createElement('tr');
-            let sClass = "status-default";
-            if (item.status === '계약자') { sClass = "status-contractor"; tr.className = "highlight-blue"; }
-            else if (item.status === '약속잡음') sClass = "status-appointment";
-            else if (item.status === '취소' || item.status === '취소(AS)') { sClass = "status-cancel"; tr.className = "highlight-red"; }
-            else if (item.status === '2차성공') sClass = "status-success";
-            else if (item.status === '부재' || item.status === '보류') sClass = "status-db";
+    const pagination =
+        document.getElementById('pagination');
 
-            tr.innerHTML = `
-                <td>${item.date}</td>
-                <td><strong>${item.name}</strong></td>
-                <td>${item.phone}</td>
-                <td>${item.region}</td>
-                <td>${item.city}</td>
-                <td>${item.birth}</td>
-                <td>${item.gender}</td>
-                <td class="memo-cell" onclick="openEditModal(${index})">${item.memo}</td>
-                <td style="cursor:pointer" onclick="openEditModal(${index})"><span class="status-badge ${sClass}">${item.status}</span></td>
-                <td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow(${index})">삭제</button></td>
-            `;
-            tbody.appendChild(tr);
+    const searchTerm =
+        document.getElementById('searchInput')
+        .value
+        .toLowerCase();
+
+    tbody.innerHTML = "";
+
+    let filteredData =
+        customerData.filter(item => {
+
+            if(!searchTerm) return true;
+
+            return JSON.stringify(item)
+                .toLowerCase()
+                .includes(searchTerm);
         });
+
+    const totalPages =
+        Math.ceil(
+            filteredData.length / rowsPerPage
+        );
+
+    if(currentPage > totalPages){
+
+        currentPage = 1;
     }
+
+    const start =
+        (currentPage - 1) * rowsPerPage;
+
+    const end =
+        start + rowsPerPage;
+
+    const pageData =
+        filteredData.slice(start, end);
+
+    pageData.forEach((item) => {
+
+        const realIndex =
+            customerData.findIndex(
+                data => data.id === item.id
+            );
+
+        const tr =
+            document.createElement('tr');
+
+        let sClass =
+            "status-default";
+
+        if(item.status === '계약자'){
+
+            sClass = "status-contractor";
+
+            tr.className =
+                "highlight-blue";
+
+        }else if(item.status === '약속잡음'){
+
+            sClass = "status-appointment";
+
+        }else if(
+            item.status === '취소' ||
+            item.status === '취소(AS)'
+        ){
+
+            sClass = "status-cancel";
+
+            tr.className =
+                "highlight-red";
+
+        }else if(item.status === '2차성공'){
+
+            sClass = "status-success";
+
+        }else if(
+            item.status === '부재' ||
+            item.status === '보류'
+        ){
+
+            sClass = "status-db";
+        }
+
+        tr.innerHTML = `
+            <td>${item.date}</td>
+            <td><strong>${item.name}</strong></td>
+            <td>${item.phone}</td>
+            <td>${item.region}</td>
+            <td>${item.city}</td>
+            <td>${item.birth}</td>
+            <td>${item.gender}</td>
+
+            <td class="memo-cell"
+            onclick="openEditModal(${realIndex})">
+
+                ${item.memo}
+
+            </td>
+
+            <td style="cursor:pointer"
+            onclick="openEditModal(${realIndex})">
+
+                <span class="status-badge ${sClass}">
+
+                    ${item.status}
+
+                </span>
+
+            </td>
+
+            <td>
+
+                <button
+                class="btn"
+                style="
+                padding:4px 8px;
+                font-size:10px;
+                background:#ff4d4f;
+                color:white;
+                "
+                onclick="deleteRow(${realIndex})">
+
+                    삭제
+
+                </button>
+
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    pagination.innerHTML = "";
+
+    for(let i = 1; i <= totalPages; i++){
+
+        const btn =
+            document.createElement('button');
+
+        btn.innerText = i;
+
+        btn.className = 'btn';
+
+        btn.style.background =
+            i === currentPage
+            ? '#409eff'
+            : '#ddd';
+
+        btn.style.color =
+            i === currentPage
+            ? 'white'
+            : 'black';
+
+        btn.style.padding =
+            '6px 10px';
+
+        btn.onclick = () => {
+
+            currentPage = i;
+
+            renderTable();
+        };
+
+        pagination.appendChild(btn);
+    }
+};
+    
 
     window.formatPhone = function(input){
 
