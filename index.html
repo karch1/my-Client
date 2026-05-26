@@ -7,26 +7,20 @@
     <style>
         /* 기본 스타일 */
         body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; font-size: 13px; color: #333; }
-        
         .input-panel { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 10px; }
         .input-grid input, .input-grid select { padding: 8px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 12px; }
-        
         .search-row { display: flex; gap: 10px; margin-bottom: 15px; padding: 10px; background: #eef2f7; border-radius: 8px; }
         .search-row input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        
         .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn { border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
         .add-btn { background-color: #409eff; color: white; flex: 2; min-width: 120px; }
         .btn:hover { opacity: 0.8; }
-        
         .container { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; }
         table { width: 100%; border-collapse: collapse; min-width: 1200px; }
         th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; }
         th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-index: 10; }
-        
         .sort-select { font-size: 10px; padding: 2px; margin-left: 5px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
-        
         .status-badge { display: inline-block; padding: 4px 10px; border: 1px solid #dee2e6; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; min-width: 60px; }
         .status-contractor { background-color: #e6f7ff; border-color: #91d5ff; color: #1890ff; }
         .status-cancel { background-color: #fff1f0; border-color: #ffa39e; color: #e63946; }
@@ -34,16 +28,12 @@
         .status-appointment { background-color: #f6ffed; border-color: #b7eb8f; color: #52c41a; }
         .status-success { background-color: #e6f7ff; border-color: #91d5ff; color: #1890ff; }
         .status-default { background-color: #ffffff; color: #333; }
-        
         .highlight-red { background-color: #fff8f8; color: #e63946 !important; font-weight: bold; }
         .highlight-blue { background-color: #f0f9ff; }
-        
         .memo-cell { max-width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #666; }
-        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
         .modal-content { width: 90%; max-width: 500px; background: white; border-radius: 15px; padding: 20px; }
-        
         .memo-edit-area { width: 100%; height: 120px; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
         .option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .option-item { padding: 8px; text-align: center; border-radius: 6px; background: #f1f3f5; cursor: pointer; font-size: 11px; border: 1px solid transparent; }
@@ -89,30 +79,9 @@
         <input type="text" id="newMemo" placeholder="메모/상담내용" style="grid-column: span 2;">
     </div>
     <div class="btn-row">
-
-    <button class="btn"
-    onclick="googleLogin()"
-    style="background:#222; color:white;">
-
-        구글 로그인
-
-    </button>
-
-    <button class="btn"
-    onclick="logout()"
-    style="background:#999; color:white;">
-
-        로그아웃
-
-    </button>
-
-    <button class="btn add-btn"
-    onclick="addNewRow()">
-
-        새 데이터 추가
-
-    </button>
-
+        <button class="btn" onclick="googleLogin()" style="background:#222; color:white;">구글 로그인</button>
+        <button class="btn" onclick="logout()" style="background:#999; color:white;">로그아웃</button>
+        <button class="btn add-btn" onclick="addNewRow()">새 데이터 추가</button>
     </div>
 </div>
 
@@ -130,63 +99,16 @@
     </table>
 </div>
 
-    <div id="pagination"
-style="
-display:flex;
-justify-content:center;
-gap:6px;
-margin-top:15px;
-flex-wrap:wrap;
-"></div>
+<div id="pagination" style="display:flex; justify-content:center; gap:6px; margin-top:15px; flex-wrap:wrap;"></div>
 
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
         <h3 id="modalTitle">정보 수정</h3>
-
-<input type="text"
-id="editName"
-placeholder="고객명"
-style="
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border:1px solid #ddd;
-border-radius:8px;
-box-sizing:border-box;
-">
-
-<input type="text"
-id="editPhone"
-placeholder="전화번호"
-maxlength="13"
-oninput="formatPhone(this)"
-style="
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border:1px solid #ddd;
-border-radius:8px;
-box-sizing:border-box;
-">
-
-<input type="text"
-id="editBirth"
-placeholder="생년월일"
-maxlength="10"
-oninput="formatBirth(this)"
-style="
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border:1px solid #ddd;
-border-radius:8px;
-box-sizing:border-box;
-">
-
-<textarea id="memoInput"
-class="memo-edit-area"></textarea>
-
-<div class="option-list" id="optionList"></div>
+        <input type="text" id="editName" placeholder="고객명" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        <input type="text" id="editPhone" placeholder="전화번호" maxlength="13" oninput="formatPhone(this)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        <input type="text" id="editBirth" placeholder="생년월일" maxlength="10" oninput="formatBirth(this)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        <textarea id="memoInput" class="memo-edit-area"></textarea>
+        <div class="option-list" id="optionList"></div>
         <div style="display: flex; gap: 10px;">
             <button class="btn add-btn" onclick="saveChanges()" style="flex:1">저장하기</button>
             <button class="btn" onclick="closeModal()" style="flex:1; background:#ccc;">닫기</button>
@@ -195,41 +117,25 @@ class="memo-edit-area"></textarea>
 </div>
 
 <script type="module">
-    import { initializeApp } 
-        from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot} 
-        from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-import {
-    getAuth,
-    GoogleAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
     const firebaseConfig = {
-    apiKey: "AIzaSyC8CiV8yujqwa0ovgwQ8_Y47ucHlSzQcIE",
-    authDomain: "my-client-dc700.firebaseapp.com",
-    projectId: "my-client-dc700",
-    storageBucket: "my-client-dc700.firebasestorage.app",
-    messagingSenderId: "117891017561",
-    appId: "1:117891017561:web:e2a5266154d112c568fa48"
-};
+        apiKey: "AIzaSyC8CiV8yujqwa0ovgwQ8_Y47ucHlSzQcIE",
+        authDomain: "my-client-dc700.firebaseapp.com",
+        projectId: "my-client-dc700",
+        storageBucket: "my-client-dc700.firebasestorage.app",
+        messagingSenderId: "117891017561",
+        appId: "1:117891017561:web:e2a5266154d112c568fa48"
+    };
 
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
-const customerRef =
-    collection(db, "customers");
-
-const auth = getAuth(app);
-
-const provider =
-    new GoogleAuthProvider();
-    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const customerRef = collection(db, "customers");
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+        
     let customerData = [];
     let activeRowIndex = null;
     let selectedStatus = "";
@@ -238,48 +144,38 @@ const provider =
     const statuses = ['계약자', '2차성공', '약속잡음', '부재', '보류', '취소', '취소(AS)'];
     const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '부재': 3, '보류': 4, '취소': 5, '취소(AS)': 6 };
 
+    // 초기 실행
     window.onload = async function() {
-
         checkNotice();
-
-        document.getElementById('newDate').valueAsDate =
-            new Date();
-
+        document.getElementById('newDate').valueAsDate = new Date();
         initModalOptions();
     };
 
+    // 공지 모달 확인
     function checkNotice() {
         const hideUntil = localStorage.getItem('hideNoticeUntil');
         if (!hideUntil || new Date().getTime() > hideUntil) document.getElementById('noticeModal').classList.add('active');
     }
 
+    // 공지 닫기
     window.closeNotice = function() {
         if (document.getElementById('hideNotice').checked) localStorage.setItem('hideNoticeUntil', new Date().getTime() + (24 * 60 * 60 * 1000));
         document.getElementById('noticeModal').classList.remove('active');
     }
 
+    // 데이터 불러오기
     function loadCustomers() {
-
-    onSnapshot(customerRef, (snapshot) => {
-
-        customerData = [];
-
-        snapshot.forEach((docItem) => {
-
-            customerData.push({
-                id: docItem.id,
-                ...docItem.data()
+        onSnapshot(customerRef, (snapshot) => {
+            customerData = [];
+            snapshot.forEach((docItem) => {
+                customerData.push({ id: docItem.id, ...docItem.data() });
             });
+            customerData.sort((a,b) => new Date(b.date) - new Date(a.date));
+            renderTable();
         });
+    }
 
-        customerData.sort(
-            (a,b) =>
-            new Date(b.date) - new Date(a.date)
-        );
-
-        renderTable();
-    });
-}
+    // 데이터 정렬
     window.sortData = function(field, type) {
         if (type === 'none') {
             customerData.sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -296,6 +192,7 @@ const provider =
         renderTable();
     }
 
+    // 수정 모달 옵션 초기화
     function initModalOptions() {
         const container = document.getElementById('optionList');
         container.innerHTML = "";
@@ -312,235 +209,74 @@ const provider =
         });
     }
 
+    // 테이블 렌더링 및 페이지네이션
     window.renderTable = function() {
+        const tbody = document.getElementById('tableBody');
+        const pagination = document.getElementById('pagination');
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        tbody.innerHTML = "";
+        let filteredData = customerData.filter(item => !searchTerm || JSON.stringify(item).toLowerCase().includes(searchTerm));
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        if(currentPage > totalPages) currentPage = 1;
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = filteredData.slice(start, end);
 
-    const tbody =
-        document.getElementById('tableBody');
+        pageData.forEach((item) => {
+            const realIndex = customerData.findIndex(data => data.id === item.id);
+            const tr = document.createElement('tr');
+            let sClass = "status-default";
+            if(item.status === '계약자'){ sClass = "status-contractor"; tr.className = "highlight-blue"; }
+            else if(item.status === '약속잡음'){ sClass = "status-appointment"; }
+            else if(item.status === '취소' || item.status === '취소(AS)'){ sClass = "status-cancel"; tr.className = "highlight-red"; }
+            else if(item.status === '2차성공'){ sClass = "status-success"; }
+            else if(item.status === '부재' || item.status === '보류'){ sClass = "status-db"; }
 
-    const pagination =
-        document.getElementById('pagination');
-
-    const searchTerm =
-        document.getElementById('searchInput')
-        .value
-        .toLowerCase();
-
-    tbody.innerHTML = "";
-
-    let filteredData =
-        customerData.filter(item => {
-
-            if(!searchTerm) return true;
-
-            return JSON.stringify(item)
-                .toLowerCase()
-                .includes(searchTerm);
+            tr.innerHTML = `
+                <td>${item.date}</td>
+                <td><strong>${item.name}</strong></td>
+                <td>${item.phone}</td>
+                <td>${item.region}</td>
+                <td>${item.city}</td>
+                <td>${item.birth}</td>
+                <td>${item.gender}</td>
+                <td class="memo-cell" onclick="openEditModal(${realIndex})">${item.memo}</td>
+                <td style="cursor:pointer" onclick="openEditModal(${realIndex})"><span class="status-badge ${sClass}">${item.status}</span></td>
+                <td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow(${realIndex})">삭제</button></td>
+            `;
+            tbody.appendChild(tr);
         });
 
-    const totalPages =
-        Math.ceil(
-            filteredData.length / rowsPerPage
-        );
-
-    if(currentPage > totalPages){
-
-        currentPage = 1;
-    }
-
-    const start =
-        (currentPage - 1) * rowsPerPage;
-
-    const end =
-        start + rowsPerPage;
-
-    const pageData =
-        filteredData.slice(start, end);
-
-    pageData.forEach((item) => {
-
-        const realIndex =
-            customerData.findIndex(
-                data => data.id === item.id
-            );
-
-        const tr =
-            document.createElement('tr');
-
-        let sClass =
-            "status-default";
-
-        if(item.status === '계약자'){
-
-            sClass = "status-contractor";
-
-            tr.className =
-                "highlight-blue";
-
-        }else if(item.status === '약속잡음'){
-
-            sClass = "status-appointment";
-
-        }else if(
-            item.status === '취소' ||
-            item.status === '취소(AS)'
-        ){
-
-            sClass = "status-cancel";
-
-            tr.className =
-                "highlight-red";
-
-        }else if(item.status === '2차성공'){
-
-            sClass = "status-success";
-
-        }else if(
-            item.status === '부재' ||
-            item.status === '보류'
-        ){
-
-            sClass = "status-db";
+        pagination.innerHTML = "";
+        for(let i = 1; i <= totalPages; i++){
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.className = 'btn';
+            btn.style.background = i === currentPage ? '#409eff' : '#ddd';
+            btn.style.color = i === currentPage ? 'white' : 'black';
+            btn.style.padding = '6px 10px';
+            btn.onclick = () => { currentPage = i; renderTable(); };
+            pagination.appendChild(btn);
         }
+    };
 
-        tr.innerHTML = `
-            <td>${item.date}</td>
-            <td><strong>${item.name}</strong></td>
-            <td>${item.phone}</td>
-            <td>${item.region}</td>
-            <td>${item.city}</td>
-            <td>${item.birth}</td>
-            <td>${item.gender}</td>
-
-            <td class="memo-cell"
-            onclick="openEditModal(${realIndex})">
-
-                ${item.memo}
-
-            </td>
-
-            <td style="cursor:pointer"
-            onclick="openEditModal(${realIndex})">
-
-                <span class="status-badge ${sClass}">
-
-                    ${item.status}
-
-                </span>
-
-            </td>
-
-            <td>
-
-                <button
-                class="btn"
-                style="
-                padding:4px 8px;
-                font-size:10px;
-                background:#ff4d4f;
-                color:white;
-                "
-                onclick="deleteRow(${realIndex})">
-
-                    삭제
-
-                </button>
-
-            </td>
-        `;
-
-        tbody.appendChild(tr);
-    });
-
-    pagination.innerHTML = "";
-
-    for(let i = 1; i <= totalPages; i++){
-
-        const btn =
-            document.createElement('button');
-
-        btn.innerText = i;
-
-        btn.className = 'btn';
-
-        btn.style.background =
-            i === currentPage
-            ? '#409eff'
-            : '#ddd';
-
-        btn.style.color =
-            i === currentPage
-            ? 'white'
-            : 'black';
-
-        btn.style.padding =
-            '6px 10px';
-
-        btn.onclick = () => {
-
-            currentPage = i;
-
-            renderTable();
-        };
-
-        pagination.appendChild(btn);
-    }
-};
-    
-
+    // 전화번호 입력 형식
     window.formatPhone = function(input){
+        let value = input.value.replace(/\D/g,'');
+        if(value.length < 4) input.value = value;
+        else if(value.length < 8) input.value = value.replace(/(\d{3})(\d+)/, '$1-$2');
+        else input.value = value.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
+    };
 
-    let value =
-        input.value.replace(/\D/g,'');
+    // 생년월일 입력 형식
+    window.formatBirth = function(input){
+        let value = input.value.replace(/\D/g,'');
+        if(value.length < 5) input.value = value;
+        else if(value.length < 7) input.value = value.replace(/(\d{4})(\d+)/, '$1-$2');
+        else input.value = value.replace(/(\d{4})(\d{2})(\d+)/, '$1-$2-$3');
+    };
 
-    if(value.length < 4){
-
-        input.value = value;
-
-    }else if(value.length < 8){
-
-        input.value =
-            value.replace(
-                /(\d{3})(\d+)/,
-                '$1-$2'
-            );
-
-    }else{
-
-        input.value =
-            value.replace(
-                /(\d{3})(\d{4})(\d+)/,
-                '$1-$2-$3'
-            );
-    }
-};
-
-window.formatBirth = function(input){
-
-    let value =
-        input.value.replace(/\D/g,'');
-
-    if(value.length < 5){
-
-        input.value = value;
-
-    }else if(value.length < 7){
-
-        input.value =
-            value.replace(
-                /(\d{4})(\d+)/,
-                '$1-$2'
-            );
-
-    }else{
-
-        input.value =
-            value.replace(
-                /(\d{4})(\d{2})(\d+)/,
-                '$1-$2-$3'
-            );
-    }
-};
-
+    // 데이터 추가
     window.addNewRow = async function() {
         const newItem = {
             date: document.getElementById('newDate').value,
@@ -554,55 +290,13 @@ window.formatBirth = function(input){
             memo: document.getElementById('newMemo').value
         };
         if(!newItem.name) return alert("고객명은 필수입니다.");
-    const phoneRegex =
-    /^010-\d{4}-\d{4}$/;
-
-if(!phoneRegex.test(newItem.phone)){
-
-    return alert(
-        "전화번호 형식이 올바르지 않습니다."
-    );
-}
-
-const birthRegex =
-    /^\d{4}-\d{2}-\d{2}$/;
-
-if(!birthRegex.test(newItem.birth)){
-
-    return alert(
-        "생년월일 형식이 올바르지 않습니다."
-    );
-}
-
-        const [year, month, day] =
-    newItem.birth.split('-').map(Number);
-
-const birthDate =
-    new Date(year, month - 1, day);
-
-const isValidDate =
-    birthDate.getFullYear() === year &&
-    birthDate.getMonth() === month - 1 &&
-    birthDate.getDate() === day;
-
-if(!isValidDate){
-
-    return alert(
-        "유효한 생년월일을 입력해주세요."
-    );
-}
-
-const duplicate =
-    customerData.some(item =>
-        item.phone === newItem.phone
-    );
-
-if(duplicate){
-
-    return alert(
-        "이미 등록된 전화번호입니다."
-    );
-}
+        if(!/^010-\d{4}-\d{4}$/.test(newItem.phone)) return alert("전화번호 형식이 올바르지 않습니다.");
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(newItem.birth)) return alert("생년월일 형식이 올바르지 않습니다.");
+        
+        const [year, month, day] = newItem.birth.split('-').map(Number);
+        const birthDate = new Date(year, month - 1, day);
+        if(birthDate.getFullYear() !== year || birthDate.getMonth() !== month - 1 || birthDate.getDate() !== day) return alert("유효한 생년월일을 입력해주세요.");
+        if(customerData.some(item => item.phone === newItem.phone)) return alert("이미 등록된 전화번호입니다.");
         
         const docRef = await addDoc(customerRef, newItem);
         customerData.unshift({ id: docRef.id, ...newItem });
@@ -612,138 +306,51 @@ if(duplicate){
         document.getElementById('newMemo').value = "";
     }
 
+    // 수정 모달 열기
     window.openEditModal = function(index) {
         activeRowIndex = index;
         const item = customerData[index];
         document.getElementById('modalTitle').innerText = `${item.name}님 정보 수정`;
         document.getElementById('memoInput').value = item.memo;
-        document.getElementById('editName').value =
-    item.name;
-
-document.getElementById('editPhone').value =
-    item.phone;
-
-document.getElementById('editBirth').value =
-    item.birth;
+        document.getElementById('editName').value = item.name;
+        document.getElementById('editPhone').value = item.phone;
+        document.getElementById('editBirth').value = item.birth;
         selectedStatus = item.status;
         Array.from(document.getElementById('optionList').children).forEach(opt => opt.classList.toggle('selected', opt.innerText === selectedStatus));
         document.getElementById('modalOverlay').classList.add('active');
     }
 
+    // 정보 수정 저장
     window.saveChanges = async function() {
+        const editName = document.getElementById('editName').value;
+        const editPhone = document.getElementById('editPhone').value;
+        const editBirth = document.getElementById('editBirth').value;
+        const editMemo = document.getElementById('memoInput').value;
+        if(!editName) return alert("고객명을 입력해주세요.");
+        if(!/^010-\d{4}-\d{4}$/.test(editPhone)) return alert("전화번호 형식이 올바르지 않습니다.");
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(editBirth)) return alert("생년월일 형식이 올바르지 않습니다.");
+        
+        const [year, month, day] = editBirth.split('-').map(Number);
+        const birthDate = new Date(year, month - 1, day);
+        if(birthDate.getFullYear() !== year || birthDate.getMonth() !== month - 1 || birthDate.getDate() !== day) return alert("유효한 생년월일을 입력해주세요.");
+        if(customerData.some((item, index) => item.phone === editPhone && index !== activeRowIndex)) return alert("이미 등록된 전화번호입니다.");
 
-    const editName =
-        document.getElementById('editName').value;
-        if(!editName){
+        customerData[activeRowIndex].name = editName;
+        customerData[activeRowIndex].phone = editPhone;
+        customerData[activeRowIndex].birth = editBirth;
+        customerData[activeRowIndex].memo = editMemo;
+        customerData[activeRowIndex].status = selectedStatus;
 
-    return alert(
-        "고객명을 입력해주세요."
-    );
-}
+        await updateDoc(doc(db, "customers", customerData[activeRowIndex].id), { name: editName, phone: editPhone, birth: editBirth, memo: editMemo, status: selectedStatus });
+        renderTable();
+        closeModal();
+        alert("수정 완료");
+    };
 
-    const editPhone =
-        document.getElementById('editPhone').value;
-
-    const editBirth =
-        document.getElementById('editBirth').value;
-
-    const editMemo =
-        document.getElementById('memoInput').value;
-
-    const phoneRegex =
-        /^010-\d{4}-\d{4}$/;
-
-    if(!phoneRegex.test(editPhone)){
-
-        return alert(
-            "전화번호 형식이 올바르지 않습니다."
-        );
-    }
-
-    const birthRegex =
-        /^\d{4}-\d{2}-\d{2}$/;
-
-    if(!birthRegex.test(editBirth)){
-
-        return alert(
-            "생년월일 형식이 올바르지 않습니다."
-        );
-    }
-
-    const [year, month, day] =
-        editBirth.split('-').map(Number);
-
-    const birthDate =
-        new Date(year, month - 1, day);
-
-    const isValidDate =
-        birthDate.getFullYear() === year &&
-        birthDate.getMonth() === month - 1 &&
-        birthDate.getDate() === day;
-
-    if(!isValidDate){
-
-        return alert(
-            "유효한 생년월일을 입력해주세요."
-        );
-    }
-
-    const duplicate =
-        customerData.some((item, index) =>
-
-            item.phone === editPhone &&
-            index !== activeRowIndex
-        );
-
-    if(duplicate){
-
-        return alert(
-            "이미 등록된 전화번호입니다."
-        );
-    }
-
-    customerData[activeRowIndex].name =
-        editName;
-
-    customerData[activeRowIndex].phone =
-        editPhone;
-
-    customerData[activeRowIndex].birth =
-        editBirth;
-
-    customerData[activeRowIndex].memo =
-        editMemo;
-
-    customerData[activeRowIndex].status =
-        selectedStatus;
-
-    await updateDoc(
-
-        doc(
-            db,
-            "customers",
-            customerData[activeRowIndex].id
-        ),
-
-        {
-
-            name: editName,
-            phone: editPhone,
-            birth: editBirth,
-            memo: editMemo,
-            status: selectedStatus
-        }
-    );
-
-    renderTable();
-
-    closeModal();
-
-    alert("수정 완료");
-};
-
+    // 모달 닫기
     window.closeModal = function() { document.getElementById('modalOverlay').classList.remove('active'); }
 
+    // 데이터 삭제
     window.deleteRow = async function(index) {
         if(confirm("정말 삭제하시겠습니까?")) {
             await deleteDoc(doc(db, "customers", customerData[index].id));
@@ -752,70 +359,26 @@ document.getElementById('editBirth').value =
         }
     };
 
+    // 구글 로그인
     window.googleLogin = async function () {
-
-    try {
-
-        const result =
-            await signInWithPopup(auth, provider);
-
-        const user = result.user;
-
-        if(user.email !== "choae000@gmail.com"){
-
-            alert("허용된 계정이 아닙니다.");
-
-            await signOut(auth);
-
-            return;
-        }
-
-        alert("로그인 성공");
-
-        loadCustomers();
-
-    } catch(error){
-
-        console.error(error);
-
-        alert("로그인 실패");
-    }
-};
-
-window.logout = async function(){
-
-    await signOut(auth);
-
-    customerData = [];
-
-    renderTable();
-
-    alert("로그아웃 완료");
-};
-
-onAuthStateChanged(auth, async(user)=>{
-
-    if(user){
-
-        if(user.email === "choae000@gmail.com"){
-
+        try {
+            const result = await signInWithPopup(auth, provider);
+            if(result.user.email !== "choae000@gmail.com"){ alert("허용된 계정이 아닙니다."); await signOut(auth); return; }
+            alert("로그인 성공");
             loadCustomers();
+        } catch(error){ console.error(error); alert("로그인 실패"); }
+    };
 
-        }else{
+    // 로그아웃
+    window.logout = async function(){ await signOut(auth); customerData = []; renderTable(); alert("로그아웃 완료"); };
 
-            await signOut(auth);
-
-            alert("허용되지 않은 계정");
-        }
-
-    }else{
-
-        customerData = [];
-
-        renderTable();
-    }
-});
-    
+    // 로그인 상태 변경
+    onAuthStateChanged(auth, async(user)=>{
+        if(user){
+            if(user.email === "choae000@gmail.com") loadCustomers();
+            else { await signOut(auth); alert("허용되지 않은 계정"); }
+        } else { customerData = []; renderTable(); }
+    });
 </script>
 </body>
 </html>
