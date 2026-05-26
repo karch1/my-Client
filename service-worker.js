@@ -1,4 +1,4 @@
-const CACHE_NAME = "db-manager-v2"; // v1 -> v2로 변경
+const CACHE_NAME = "db-manager-v3"; // v1 -> v2로 변경
 
 const urlsToCache = [
     "./",
