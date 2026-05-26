@@ -83,6 +83,16 @@
         </select>
         <input type="text" id="newMemo" placeholder="메모/상담내용" style="grid-column: span 2;">
     </div>
+
+    <div class="filter-tab-row" style="margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap;">
+    <button class="btn" onclick="setFilter('ALL')" style="background:#6c757d; color:white;">전체</button>
+    <button class="btn" onclick="setFilter('계약자')" style="background:#1890ff; color:white;">계약자</button>
+    <button class="btn" onclick="setFilter('2차성공')" style="background:#1890ff; color:white;">2차성공</button>
+    <button class="btn" onclick="setFilter('약속잡음')" style="background:#52c41a; color:white;">약속잡음</button>
+    <button class="btn" onclick="setFilter('부재')" style="background:#8c8c8c; color:white;">부재</button>
+    <button class="btn" onclick="setFilter('보류')" style="background:#8c8c8c; color:white;">보류</button>
+</div>
+    
     <div class="btn-row">
         <button class="btn" onclick="googleLogin()" style="background:#222; color:white;">구글 로그인</button>
         <button class="btn" onclick="logout()" style="background:#999; color:white;">로그아웃</button>
@@ -150,6 +160,9 @@
     const statuses = ['계약자', '2차성공', '약속잡음', '부재', '보류', '취소', '취소(AS)'];
     const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '부재': 3, '보류': 4, '취소': 5, '취소(AS)': 6 };
 
+    // 검색기능 추가
+    let currentFilter = "ALL";
+
     // 초기 실행
     window.onload = async function() {
         checkNotice();
@@ -181,6 +194,13 @@
         });
     }
 
+    // 드롭다운검색
+        window.setFilter = function(status) {
+        currentFilter = status;
+        currentPage = 1;
+        renderTable();
+            };
+        
     // 데이터 정렬
     window.sortData = function(field, type) {
         if (type === 'none') {
@@ -221,7 +241,11 @@
         const pagination = document.getElementById('pagination');
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         tbody.innerHTML = "";
-        let filteredData = customerData.filter(item => !searchTerm || JSON.stringify(item).toLowerCase().includes(searchTerm));
+        let filteredData = customerData.filter(item => {
+            const matchSearch = !searchTerm || JSON.stringify(item).toLowerCase().includes(searchTerm);
+            const matchStatus = (currentFilter === "ALL") || (item.status === currentFilter);
+            return matchSearch && matchStatus;
+        });
         const totalPages = Math.ceil(filteredData.length / rowsPerPage);
         if(currentPage > totalPages) currentPage = 1;
         const start = (currentPage - 1) * rowsPerPage;
