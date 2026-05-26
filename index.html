@@ -90,6 +90,49 @@
     </div>
 </div>
 
+    <!-- 사이드바 -->
+    <button onclick="toggleSidebar()" style="margin-bottom:10px;">
+    ☰ 메뉴
+</button>
+
+<div id="sidebar" style="
+    width:160px;
+    background:#fff;
+    padding:10px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    display:none;
+    position:relative;
+    margin-bottom:10px;
+">
+    <button onclick="setFilter('ALL')">전체</button>
+    <button onclick="setFilter('계약자')">계약자</button>
+    <button onclick="setFilter('2차성공')">2차성공</button>
+    <button onclick="setFilter('약속잡음')">약속잡음</button>
+    <button onclick="setFilter('부재')">부재</button>
+    <button onclick="setFilter('보류')">보류</button>
+    <button onclick="setFilter('취소')">취소</button>
+    <button onclick="setFilter('취소(AS)')">취소(AS)</button>
+</div>
+
+    <div id="contractSidebar" style="
+    width:160px;
+    background:#fff;
+    padding:10px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    display:none;
+    position:relative;
+    margin-bottom:10px;
+">
+    <button onclick="setView('ALL')">전체 보기</button>
+    <button onclick="setView('CONTRACT')">📌 기고객(계약자)</button>
+</div>
+
+<button onclick="toggleContractSidebar()" style="margin-bottom:10px;">
+☰ 기고객 메뉴
+</button>
+
 <div class="container">
     <table>
         <thead>
@@ -215,57 +258,99 @@
         });
     }
 
-    // 테이블 렌더링 및 페이지네이션
-    window.renderTable = function() {
-        const tbody = document.getElementById('tableBody');
-        const pagination = document.getElementById('pagination');
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        tbody.innerHTML = "";
-        let filteredData = customerData.filter(item => !searchTerm || JSON.stringify(item).toLowerCase().includes(searchTerm));
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        if(currentPage > totalPages) currentPage = 1;
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        const pageData = filteredData.slice(start, end);
+   window.renderTable = function () {
+    const tbody = document.getElementById('tableBody');
+    const pagination = document.getElementById('pagination');
 
-        pageData.forEach((item) => {
-            const realIndex = customerData.findIndex(data => data.id === item.id);
-            const tr = document.createElement('tr');
-            let sClass = "status-default";
-            if(item.status === '계약자'){ sClass = "status-contractor"; tr.className = "highlight-blue"; }
-            else if(item.status === '약속잡음'){ sClass = "status-appointment"; }
-            else if(item.status === '취소' || item.status === '취소(AS)'){ sClass = "status-cancel"; tr.className = "highlight-red"; }
-            else if(item.status === '2차성공'){ sClass = "status-success"; }
-            else if(item.status === '부재' || item.status === '보류'){ sClass = "status-db"; }
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-            tr.innerHTML = `
-                <td>${item.date}</td>
-                <td><strong>${item.name}</strong></td>
-                <td>${item.phone}</td>
-                <td>${item.region}</td>
-                <td>${item.city}</td>
-                <td>${item.birth}</td>
-                <td>${item.gender}</td>
-                <td class="memo-cell" onclick="openEditModal(${realIndex})">${item.memo}</td>
-                <td style="cursor:pointer" onclick="openEditModal(${realIndex})"><span class="status-badge ${sClass}">${item.status}</span></td>
-                <td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow(${realIndex})">삭제</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
+    tbody.innerHTML = "";
 
-        pagination.innerHTML = "";
-        for(let i = 1; i <= totalPages; i++){
-            const btn = document.createElement('button');
-            btn.innerText = i;
-            btn.className = 'btn';
-            btn.style.background = i === currentPage ? '#409eff' : '#ddd';
-            btn.style.color = i === currentPage ? 'white' : 'black';
-            btn.style.padding = '6px 10px';
-            btn.onclick = () => { currentPage = i; renderTable(); };
-            pagination.appendChild(btn);
+    const filteredData = customerData.filter(item => {
+
+        const matchSearch =
+            !searchTerm ||
+            JSON.stringify(item).toLowerCase().includes(searchTerm);
+
+        const matchStatus =
+            currentFilter === "ALL" || item.status === currentFilter;
+
+        const matchView =
+    currentView === "ALL" ||
+    (currentView === "CONTRACT" && item.status === "계약자");
+
+        return matchSearch && matchStatus && matchView;
+    });
+
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+    if (currentPage > totalPages) currentPage = 1;
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    const pageData = filteredData.slice(start, end);
+
+    pageData.forEach((item) => {
+        const realIndex = customerData.findIndex(data => data.id === item.id);
+
+        const tr = document.createElement('tr');
+
+        let sClass = "status-default";
+
+        if(item.status === '계약자'){
+            sClass = "status-contractor";
+            tr.className = "highlight-blue";
         }
-    };
+        else if(item.status === '약속잡음'){
+            sClass = "status-appointment";
+        }
+        else if(item.status === '취소' || item.status === '취소(AS)'){
+            sClass = "status-cancel";
+            tr.className = "highlight-red";
+        }
+        else if(item.status === '2차성공'){
+            sClass = "status-success";
+        }
+        else if(item.status === '부재' || item.status === '보류'){
+            sClass = "status-db";
+        }
 
+        tr.innerHTML = `
+            <td>${item.date}</td>
+            <td><strong>${item.name}</strong></td>
+            <td>${item.phone}</td>
+            <td>${item.region}</td>
+            <td>${item.city}</td>
+            <td>${item.birth}</td>
+            <td>${item.gender}</td>
+            <td class="memo-cell" onclick="openEditModal(${realIndex})">${item.memo}</td>
+            <td onclick="openEditModal(${realIndex})">
+                <span class="status-badge ${sClass}">${item.status}</span>
+            </td>
+            <td>
+                <button class="btn"
+                    style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;"
+                    onclick="deleteRow(${realIndex})">삭제</button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    pagination.innerHTML = "";
+
+    for(let i = 1; i <= totalPages; i++){
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = 'btn';
+        btn.style.background = i === currentPage ? '#409eff' : '#ddd';
+        btn.onclick = () => {
+            currentPage = i;
+            renderTable();
+        };
+        pagination.appendChild(btn);
+    }
+};
     // 전화번호 입력 형식
     window.formatPhone = function(input){
         let value = input.value.replace(/\D/g,'');
@@ -422,6 +507,42 @@
             else { await signOut(auth); alert("허용되지 않은 계정"); }
         } else { customerData = []; renderTable(); }
     });
+
+    // 필터기능
+    let currentFilter = "ALL";
+
+window.setFilter = function (status) {
+    currentFilter = status;
+    currentPage = 1;
+    renderTable();
+
+    document.querySelectorAll("#sidebar button").forEach(btn => {
+        btn.style.fontWeight =
+            (btn.innerText === status) ? "bold" : "normal";
+    });
+};
+
+    // 사이드바 추가
+    let currentView = "ALL";
+
+window.setView = function(view){
+    currentView = view;
+    currentPage = 1;
+    renderTable();
+};
+
+window.toggleContractSidebar = function(){
+    const el = document.getElementById("contractSidebar");
+    el.style.display = el.style.display === "block" ? "none" : "block";
+};
+    
+    // 사이드바 토글
+    window.toggleSidebar = function () {
+    const sidebar = document.getElementById("sidebar");
+
+    sidebar.style.display =
+        sidebar.style.display === "block" ? "none" : "block";
+};
 
     // 서비스 워커 js 추가
     if("serviceWorker" in navigator){
