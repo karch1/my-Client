@@ -127,8 +127,8 @@
 <div id="overlay" onclick="toggleMenu()"></div>
 
 <div id="sidebar">
-    <button onclick="setView('ALL')">전체 보기</button>
-    <button onclick="setView('CONTRACT')">📌 기고객(계약자)</button>
+    <button onclick="setView('ALL'); toggleMenu()">전체 보기</button>
+    <button onclick="setView('CONTRACT'); toggleMenu()">📌 기고객(계약자만)</button>
 </div>
 
 <div class="container">
@@ -270,19 +270,15 @@ function loadCustomers() {
     tbody.innerHTML = "";
 
     const filteredData = customerData.filter(item => {
+        // 1. 검색어 필터
+        const matchSearch = !searchTerm || JSON.stringify(item).toLowerCase().includes(searchTerm);
 
-        const matchSearch =
-            !searchTerm ||
-            JSON.stringify(item).toLowerCase().includes(searchTerm);
+        // 2. 뷰 필터 (사이드바에서 선택한 모드 적용)
+        // currentView가 'CONTRACT'면 계약자만, 아니면 전부 표시
+        const matchView = (currentView === "ALL") || (currentView === "CONTRACT" && item.status === "계약자");
 
-        const matchStatus =
-            currentFilter === "ALL" || item.status === currentFilter;
-
-        const matchView =
-    currentView === "ALL" ||
-    (currentView === "CONTRACT" && item.status === "계약자");
-
-        return matchSearch && matchStatus && matchView;
+        // 검색어와 뷰 필터가 모두 맞아야 함
+        return matchSearch && matchView;
     });
 
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
