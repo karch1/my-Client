@@ -133,8 +133,51 @@
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
         <h3 id="modalTitle">정보 수정</h3>
-        <textarea id="memoInput" class="memo-edit-area"></textarea>
-        <div class="option-list" id="optionList"></div>
+
+<input type="text"
+id="editName"
+placeholder="고객명"
+style="
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ddd;
+border-radius:8px;
+box-sizing:border-box;
+">
+
+<input type="text"
+id="editPhone"
+placeholder="전화번호"
+maxlength="13"
+oninput="formatPhone(this)"
+style="
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ddd;
+border-radius:8px;
+box-sizing:border-box;
+">
+
+<input type="text"
+id="editBirth"
+placeholder="생년월일"
+maxlength="10"
+oninput="formatBirth(this)"
+style="
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ddd;
+border-radius:8px;
+box-sizing:border-box;
+">
+
+<textarea id="memoInput"
+class="memo-edit-area"></textarea>
+
+<div class="option-list" id="optionList"></div>
         <div style="display: flex; gap: 10px;">
             <button class="btn add-btn" onclick="saveChanges()" style="flex:1">저장하기</button>
             <button class="btn" onclick="closeModal()" style="flex:1; background:#ccc;">닫기</button>
@@ -146,7 +189,7 @@
     import { initializeApp } 
         from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc} 
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot} 
         from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 import {
@@ -204,12 +247,28 @@ const provider =
         document.getElementById('noticeModal').classList.remove('active');
     }
 
-    async function loadCustomers() {
-        customerData = [];
-        const snapshot = await getDocs(customerRef);
-        snapshot.forEach(docItem => customerData.push({ id: docItem.id, ...docItem.data() }));
-    }
+    function loadCustomers() {
 
+    onSnapshot(customerRef, (snapshot) => {
+
+        customerData = [];
+
+        snapshot.forEach((docItem) => {
+
+            customerData.push({
+                id: docItem.id,
+                ...docItem.data()
+            });
+        });
+
+        customerData.sort(
+            (a,b) =>
+            new Date(b.date) - new Date(a.date)
+        );
+
+        renderTable();
+    });
+}
     window.sortData = function(field, type) {
         if (type === 'none') {
             customerData.sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -404,18 +463,130 @@ if(duplicate){
         const item = customerData[index];
         document.getElementById('modalTitle').innerText = `${item.name}님 정보 수정`;
         document.getElementById('memoInput').value = item.memo;
+        document.getElementById('editName').value =
+    item.name;
+
+document.getElementById('editPhone').value =
+    item.phone;
+
+document.getElementById('editBirth').value =
+    item.birth;
         selectedStatus = item.status;
         Array.from(document.getElementById('optionList').children).forEach(opt => opt.classList.toggle('selected', opt.innerText === selectedStatus));
         document.getElementById('modalOverlay').classList.add('active');
     }
 
     window.saveChanges = async function() {
-        customerData[activeRowIndex].memo = document.getElementById('memoInput').value;
-        customerData[activeRowIndex].status = selectedStatus;
-        await updateDoc(doc(db, "customers", customerData[activeRowIndex].id), { memo: customerData[activeRowIndex].memo, status: customerData[activeRowIndex].status });
-        renderTable();
-        closeModal();
-    };
+
+    const editName =
+        document.getElementById('editName').value;
+        if(!editName){
+
+    return alert(
+        "고객명을 입력해주세요."
+    );
+}
+
+    const editPhone =
+        document.getElementById('editPhone').value;
+
+    const editBirth =
+        document.getElementById('editBirth').value;
+
+    const editMemo =
+        document.getElementById('memoInput').value;
+
+    const phoneRegex =
+        /^010-\d{4}-\d{4}$/;
+
+    if(!phoneRegex.test(editPhone)){
+
+        return alert(
+            "전화번호 형식이 올바르지 않습니다."
+        );
+    }
+
+    const birthRegex =
+        /^\d{4}-\d{2}-\d{2}$/;
+
+    if(!birthRegex.test(editBirth)){
+
+        return alert(
+            "생년월일 형식이 올바르지 않습니다."
+        );
+    }
+
+    const [year, month, day] =
+        editBirth.split('-').map(Number);
+
+    const birthDate =
+        new Date(year, month - 1, day);
+
+    const isValidDate =
+        birthDate.getFullYear() === year &&
+        birthDate.getMonth() === month - 1 &&
+        birthDate.getDate() === day;
+
+    if(!isValidDate){
+
+        return alert(
+            "유효한 생년월일을 입력해주세요."
+        );
+    }
+
+    const duplicate =
+        customerData.some((item, index) =>
+
+            item.phone === editPhone &&
+            index !== activeRowIndex
+        );
+
+    if(duplicate){
+
+        return alert(
+            "이미 등록된 전화번호입니다."
+        );
+    }
+
+    customerData[activeRowIndex].name =
+        editName;
+
+    customerData[activeRowIndex].phone =
+        editPhone;
+
+    customerData[activeRowIndex].birth =
+        editBirth;
+
+    customerData[activeRowIndex].memo =
+        editMemo;
+
+    customerData[activeRowIndex].status =
+        selectedStatus;
+
+    await updateDoc(
+
+        doc(
+            db,
+            "customers",
+            customerData[activeRowIndex].id
+        ),
+
+        {
+
+            name: editName,
+            phone: editPhone,
+            birth: editBirth,
+            memo: editMemo,
+            status: selectedStatus
+        }
+    );
+
+    renderTable();
+
+    closeModal();
+
+    alert("수정 완료");
+};
 
     window.closeModal = function() { document.getElementById('modalOverlay').classList.remove('active'); }
 
@@ -447,9 +618,7 @@ if(duplicate){
 
         alert("로그인 성공");
 
-        await loadCustomers();
-
-        renderTable();
+        loadCustomers();
 
     } catch(error){
 
@@ -476,9 +645,7 @@ onAuthStateChanged(auth, async(user)=>{
 
         if(user.email === "choae000@gmail.com"){
 
-            await loadCustomers();
-
-            renderTable();
+            loadCustomers();
 
         }else{
 
