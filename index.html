@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB관리 메모장</title>
+    <link rel="manifest" href="manifest.json">
+
+    <meta name="theme-color" content="#409eff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <style>
         /* 기본 스타일 */
         body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; font-size: 13px; color: #333; }
@@ -379,6 +384,19 @@
             else { await signOut(auth); alert("허용되지 않은 계정"); }
         } else { customerData = []; renderTable(); }
     });
+
+    // 서비스 워커 js 추가
+    if("serviceWorker" in navigator){
+     window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(() => {
+                console.log("SW 등록 완료");
+            })
+            .catch((err) => {
+                console.log("SW 실패", err);
+            });
+    });
+}
 </script>
 </body>
 </html>
