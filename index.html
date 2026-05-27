@@ -209,11 +209,12 @@
             snapshot.forEach((docItem) => {
                 customerData.push({ id: docItem.id, ...docItem.data() });
             });
-            customerData.sort((a,b) => new Date(b.date) - new Date(a.date));
+            // [수정] 데이터를 불러올 때 '과거순(오름차순)'으로 정렬
+            customerData.sort((a,b) => new Date(a.date) - new Date(b.date));
             renderTable();
         });
     }
-
+    
     // 드롭다운검색
         window.setFilter = function(status) {
         currentFilter = status;
@@ -328,9 +329,7 @@
 
     // 데이터 추가
     window.addNewRow = async function() {
-
     if(isSaving) return;
-
     isSaving = true;
 
     try {
