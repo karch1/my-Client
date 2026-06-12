@@ -25,7 +25,9 @@
         /* 테이블 영역 */
         .container { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; }
         table { width: 100%; border-collapse: collapse; min-width: 1200px; }
-        th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; }
+        
+        /* [수정] white-space: nowrap 추가하여 모든 셀 줄바꿈 절대 방지 */
+        th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
         th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-index: 10; }
         
         .sort-select { font-size: 10px; padding: 2px; margin-left: 5px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
@@ -69,7 +71,6 @@
 </head>
 <body>
 
-<!-- 업무 공지 모달 -->
 <div class="modal-overlay" id="noticeModal">
     <div class="modal-content" style="border-top: 4px solid #409eff;">
         <h2 style="margin-top:0; color:#333;">📢 업무 공지</h2>
@@ -86,7 +87,6 @@
     </div>
 </div>
 
-<!-- 입력 및 검색 패널 -->
 <div class="input-panel">
     <div style="font-weight: bold; margin-bottom: 10px; font-size: 16px;">DB 고객 관리</div>
     <div class="search-row">
@@ -124,7 +124,6 @@
     </div>
 </div>
 
-<!-- 데이터 테이블 영역 -->
 <div class="container">
     <table>
         <thead>
@@ -141,7 +140,6 @@
 
 <div id="pagination" style="display:flex; justify-content:center; gap:6px; margin-top:15px; flex-wrap:wrap;"></div>
 
-<!-- 우측 사이드 패널 (상세 정보 확인 및 수정) -->
 <div class="side-overlay" id="sideOverlay" onclick="closeSidePanel()"></div>
 <div class="side-panel" id="sidePanel">
     <div style="display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:2px solid #f0f2f5; padding-bottom:10px;">
