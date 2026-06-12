@@ -185,7 +185,7 @@
         }
 
         .memo-cell {
-            max-width: 350px;
+            max-width: 250px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -257,14 +257,12 @@
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-            /* 모바일에서 여러 줄로 자동 넘김 */
             padding: 5px;
         }
 
         .filter-btn {
             padding: 6px 12px;
             border-radius: 20px;
-            /* 둥근 알약 모양 */
             border: 1px solid #ddd;
             background: white;
             cursor: pointer;
@@ -297,14 +295,13 @@
                 overflow-x: hidden;
             }
 
-            /* 테이블 가로 스크롤 방지 */
             table {
                 min-width: 100% !important;
             }
 
-            /* 숨길 컬럼 설정 */
+            /* 모바일에서 숨길 항목들 (important로 강제) */
             .mobile-hide {
-                display: none;
+                display: none !important;
             }
 
             .side-panel {
@@ -320,6 +317,7 @@
                 z-index: 2000;
                 padding: 20px;
                 box-sizing: border-box;
+                overflow-y: auto;
             }
 
             .side-panel.active {
@@ -414,7 +412,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>배분날짜
+                    <th class="mobile-hide">배분날짜
                         <select class="sort-select" onchange="sortData('date', this.value)">
                             <option value="none">정렬</option>
                             <option value="desc">최신순 ↓</option>
@@ -424,11 +422,11 @@
                     <th>고객명</th>
                     <th>전화번호</th>
                     <th>지역</th>
-                    <th class="mobile-hide">구군</th>
+                    <th>구군</th>
                     <th class="mobile-hide">생년</th>
                     <th class="mobile-hide">성별</th>
                     <th class="mobile-hide">메모</th>
-                    <th>현황
+                    <th class="mobile-hide">현황
                         <select class="sort-select" onchange="sortData('status', this.value)">
                             <option value="none">기본</option>
                             <option value="계약자">계약자</option>
@@ -440,7 +438,7 @@
                             <option value="취소(AS)">취소(AS)</option>
                         </select>
                     </th>
-                    <th>관리</th>
+                    <th class="mobile-hide">관리</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -505,49 +503,41 @@
         const statuses = ['계약자', '2차성공', '약속잡음', '부재', '보류', '취소', '취소(AS)'];
         const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '부재': 3, '보류': 4, '취소': 5, '취소(AS)': 6 };
 
-        // 검색기능 추가
         let currentFilter = "ALL";
 
-        // 초기 실행
         window.onload = async function () {
             checkNotice();
             document.getElementById('newDate').valueAsDate = new Date();
             initModalOptions();
         };
 
-        // 공지 모달 확인
         function checkNotice() {
             const hideUntil = localStorage.getItem('hideNoticeUntil');
             if (!hideUntil || new Date().getTime() > hideUntil) document.getElementById('noticeModal').classList.add('active');
         }
 
-        // 공지 닫기
         window.closeNotice = function () {
             if (document.getElementById('hideNotice').checked) localStorage.setItem('hideNoticeUntil', new Date().getTime() + (24 * 60 * 60 * 1000));
             document.getElementById('noticeModal').classList.remove('active');
         }
 
-        // 데이터 불러오기
         function loadCustomers() {
             onSnapshot(customerRef, (snapshot) => {
                 customerData = [];
                 snapshot.forEach((docItem) => {
                     customerData.push({ id: docItem.id, ...docItem.data() });
                 });
-                // [수정] 데이터를 불러올 때 '과거순(오름차순)'으로 정렬
                 customerData.sort((a, b) => new Date(a.date) - new Date(b.date));
                 renderTable();
             });
         }
 
-        // 드롭다운검색
         window.setFilter = function (status) {
             currentFilter = status;
             currentPage = 1;
             renderTable();
         };
 
-        // 데이터 정렬
         window.sortData = function (field, type) {
             if (type === 'none') {
                 customerData.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -564,7 +554,6 @@
             renderTable();
         }
 
-        // 수정 모달 옵션 초기화
         function initModalOptions() {
             const container = document.getElementById('optionList');
             container.innerHTML = "";
@@ -581,7 +570,6 @@
             });
         }
 
-        // 테이블 렌더링 및 페이지네이션
         window.renderTable = function () {
             const tbody = document.getElementById('tableBody');
             const pagination = document.getElementById('pagination');
@@ -608,18 +596,19 @@
                 else if (item.status === '2차성공') { sClass = "status-success"; }
                 else if (item.status === '부재' || item.status === '보류') { sClass = "status-db"; }
 
+                // 모바일 숨김 항목에 클래스 지정 (thead 구조와 동일하게 맞춤)
                 tr.innerHTML = `
-    <td onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')">${item.date}</td>
-    <td onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')"><strong>${item.name}</strong></td>
-    <td><a href="tel:${item.phone}" style="text-decoration:none; color:#1890ff; font-weight:bold;">${item.phone}</a></td>
-    <td onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')">${item.region}</td>
-    <td class="mobile-hide">${item.city}</td>
-    <td class="mobile-hide">${item.birth}</td>  
-    <td class="mobile-hide">${item.gender}</td>
-    <td class="mobile-hide" onclick="openEditModal('${item.id}')">${item.memo}</td>
-    <td onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')"><span class="status-badge ${sClass}">${item.status}</span></td>
-    <td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow('${item.id}')">삭제</button></td>
-`;
+                    <td class="mobile-hide" onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')">${item.date}</td>
+                    <td onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')"><strong>${item.name}</strong></td>
+                    <td><a href="tel:${item.phone}" style="text-decoration:none; color:#1890ff; font-weight:bold;">${item.phone}</a></td>
+                    <td onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')">${item.region}</td>
+                    <td onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')">${item.city}</td>
+                    <td class="mobile-hide">${item.birth}</td>  
+                    <td class="mobile-hide">${item.gender}</td>
+                    <td class="mobile-hide memo-cell" onclick="openEditModal('${item.id}')">${item.memo}</td>
+                    <td class="mobile-hide" onclick="window.innerWidth > 768 ? openEditModal('${item.id}') : openDetailPanel('${item.id}')"><span class="status-badge ${sClass}">${item.status}</span></td>
+                    <td class="mobile-hide"><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow('${item.id}')">삭제</button></td>
+                `;
                 tbody.appendChild(tr);
             });
 
@@ -636,7 +625,6 @@
             }
         };
 
-        // 전화번호 입력 형식
         window.formatPhone = function (input) {
             let value = input.value.replace(/\D/g, '');
             if (value.length < 4) input.value = value;
@@ -644,7 +632,6 @@
             else input.value = value.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
         };
 
-        // 생년월일 입력 형식
         window.formatBirth = function (input) {
             let value = input.value.replace(/\D/g, '');
             if (value.length < 5) input.value = value;
@@ -652,13 +639,11 @@
             else input.value = value.replace(/(\d{4})(\d{2})(\d+)/, '$1-$2-$3');
         };
 
-        // 데이터 추가
         window.addNewRow = async function () {
             if (isSaving) return;
             isSaving = true;
 
             try {
-
                 const newItem = {
                     date: document.getElementById('newDate').value,
                     name: document.getElementById('newName').value,
@@ -671,20 +656,12 @@
                     memo: document.getElementById('newMemo').value
                 };
 
-                if (!newItem.name)
-                    return alert("고객명은 필수입니다.");
+                if (!newItem.name) return alert("고객명은 필수입니다.");
+                if (!/^010-\d{4}-\d{4}$/.test(newItem.phone)) return alert("전화번호 형식이 올바르지 않습니다.");
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(newItem.birth)) return alert("생년월일 형식이 올바르지 않습니다.");
 
-                if (!/^010-\d{4}-\d{4}$/.test(newItem.phone))
-                    return alert("전화번호 형식이 올바르지 않습니다.");
-
-                if (!/^\d{4}-\d{2}-\d{2}$/.test(newItem.birth))
-                    return alert("생년월일 형식이 올바르지 않습니다.");
-
-                const [year, month, day] =
-                    newItem.birth.split('-').map(Number);
-
-                const birthDate =
-                    new Date(year, month - 1, day);
+                const [year, month, day] = newItem.birth.split('-').map(Number);
+                const birthDate = new Date(year, month - 1, day);
 
                 if (
                     birthDate.getFullYear() !== year ||
@@ -694,9 +671,7 @@
                     return alert("유효한 생년월일을 입력해주세요.");
                 }
 
-                if (customerData.some(item =>
-                    item.phone === newItem.phone
-                )) {
+                if (customerData.some(item => item.phone === newItem.phone)) {
                     return alert("이미 등록된 전화번호입니다.");
                 }
 
@@ -707,26 +682,19 @@
                 document.getElementById('newMemo').value = "";
 
             } catch (error) {
-
                 console.error(error);
                 alert("저장 실패");
-
             } finally {
-
                 isSaving = false;
             }
         }
 
-        // 수정 모달 열기
         window.openEditModal = function (id) {
-            // 1. id를 사용하여 데이터 찾기
             const item = customerData.find(d => d.id === id);
             if (!item) return;
 
-            // 2. 현재 수정 중인 ID를 전역 변수에 저장 (activeRowIndex 대신)
             window.activeEditId = id;
 
-            // 3. 모달 내용 채우기
             document.getElementById('modalTitle').innerText = `${item.name}님 정보 수정`;
             document.getElementById('memoInput').value = item.memo;
             document.getElementById('editName').value = item.name;
@@ -741,21 +709,16 @@
             document.getElementById('modalOverlay').classList.add('active');
         };
 
-        // 정보 수정 저장
         window.saveChanges = async function () {
             const editName = document.getElementById('editName').value;
             const editPhone = document.getElementById('editPhone').value;
             const editBirth = document.getElementById('editBirth').value;
             const editMemo = document.getElementById('memoInput').value;
 
-            // ... (유효성 검사 코드는 동일)
-
-            // 중복 체크: 현재 수정 중인 항목을 제외하고 동일한 번호가 있는지 확인
             if (customerData.some(item => item.phone === editPhone && item.id !== window.activeEditId)) {
                 return alert("이미 등록된 전화번호입니다.");
             }
 
-            // Firestore 업데이트
             await updateDoc(doc(db, "customers", window.activeEditId), {
                 name: editName,
                 phone: editPhone,
@@ -769,18 +732,14 @@
             alert("수정 완료");
         };
 
-        // 모달 닫기
         window.closeModal = function () { document.getElementById('modalOverlay').classList.remove('active'); }
 
-        // 데이터 삭제
         window.deleteRow = async function (id) {
             if (confirm("정말 삭제하시겠습니까?")) {
                 await deleteDoc(doc(db, "customers", id));
-                // renderTable()을 실행하면 onSnapshot이 자동으로 데이터를 갱신합니다.
             }
         };
 
-        // 구글 로그인
         window.googleLogin = async function () {
             try {
                 const result = await signInWithPopup(auth, provider);
@@ -790,10 +749,8 @@
             } catch (error) { console.error(error); alert("로그인 실패"); }
         };
 
-        // 로그아웃
         window.logout = async function () { await signOut(auth); customerData = []; renderTable(); alert("로그아웃 완료"); };
 
-        // 로그인 상태 변경
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 if (user.email === "choae000@gmail.com") loadCustomers();
@@ -806,26 +763,31 @@
             btn.classList.add('active');
         };
 
-        // [모바일 전용] 상세 패널 열기 함수
-        window.openDetailPanel = function (id) { // index -> id 로 변경
+        window.openDetailPanel = function (id) {
             if (window.innerWidth <= 768) {
-                // id를 이용해 데이터 찾기
                 const item = customerData.find(d => d.id === id);
                 if (!item) return;
 
                 document.getElementById('panelTitle').innerText = `${item.name}님 상세정보`;
+                
+                // 모바일 패널에 숨겨진 정보 전부 표시
                 document.getElementById('panelContent').innerHTML = `
-            <p><strong>구군:</strong> ${item.city || ''}</p>
-            <p><strong>생년:</strong> ${item.birth || ''}</p>
-            <p><strong>성별:</strong> ${item.gender || ''}</p>
-            <p><strong>메모:</strong> ${item.memo || ''}</p>
-        `;
+                    <div style="line-height: 1.8; font-size: 14px; margin-bottom: 15px;">
+                        <p><strong>배분날짜:</strong> ${item.date || ''}</p>
+                        <p><strong>현황:</strong> <span class="status-badge status-default" style="font-size:12px;">${item.status || ''}</span></p>
+                        <p><strong>생년:</strong> ${item.birth || ''}</p>
+                        <p><strong>성별:</strong> ${item.gender || ''}</p>
+                        <div style="background:#f8f9fa; padding:12px; border-radius:8px; margin-top:10px;">
+                            <strong>메모:</strong><br>
+                            ${item.memo ? item.memo.replace(/\n/g, '<br>') : '없음'}
+                        </div>
+                    </div>
+                `;
 
-                // 수정 버튼에 이벤트 연결 (id 전달)
                 const editBtn = document.getElementById('editBtn');
                 editBtn.onclick = () => {
                     closeDetailPanel();
-                    openEditModal(id); // index 대신 id 전달
+                    openEditModal(id);
                 };
 
                 document.getElementById('sidePanel').classList.add('active');
@@ -833,23 +795,16 @@
             }
         };
 
-        // [모바일 전용] 상세 패널 닫기 함수
         window.closeDetailPanel = function () {
             document.getElementById('sidePanel').classList.remove('active');
             document.getElementById('panelBackdrop').classList.remove('active');
         };
 
-
-        // 서비스 워커 js 추가
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker.register("./service-worker.js")
-                    .then(() => {
-                        console.log("SW 등록 완료");
-                    })
-                    .catch((err) => {
-                        console.log("SW 실패", err);
-                    });
+                    .then(() => console.log("SW 등록 완료"))
+                    .catch((err) => console.log("SW 실패", err));
             });
         }
     </script>
