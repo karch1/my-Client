@@ -22,7 +22,7 @@
         .add-btn { background-color: #409eff; color: white; flex: 2; min-width: 120px; }
         .btn:hover { opacity: 0.8; }
         
-        /* PC/모바일 공통: 테이블 영역에 스크롤을 생성하여 모든 컬럼 유지 */
+        /* 테이블 영역 */
         .container { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; }
         table { width: 100%; border-collapse: collapse; min-width: 1200px; }
         th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; }
@@ -40,12 +40,24 @@
         .highlight-blue { background-color: #f0f9ff; }
         .memo-cell { max-width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #666; }
         
+        /* 공지사항 모달 전용 스타일 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
         .modal-content { width: 90%; max-width: 500px; background: white; border-radius: 15px; padding: 20px; }
-        .memo-edit-area { width: 100%; height: 120px; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
-        .option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .option-item { padding: 8px; text-align: center; border-radius: 6px; background: #f1f3f5; cursor: pointer; font-size: 11px; border: 1px solid transparent; }
+
+        /* 무조건 우측에서 나오는 사이드 패널 스타일 (Drawer) */
+        .side-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1050; }
+        .side-overlay.active { display: block; }
+        .side-panel { position: fixed; top: 0; right: 0; width: 85%; max-width: 420px; height: 100%; background: white; z-index: 1060; transform: translateX(100%); transition: transform 0.3s ease-in-out; padding: 20px; box-sizing: border-box; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.15); }
+        .side-panel.active { transform: translateX(0); }
+        
+        /* 사이드 패널 내부 폼 레이아웃 */
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 12px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
+        .memo-edit-area { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; resize: none; }
+        .option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 5px; }
+        .option-item { padding: 8px; text-align: center; border-radius: 6px; background: #f1f3f5; cursor: pointer; font-size: 11px; border: 1px solid transparent; font-weight: bold; }
         .option-item.selected { background: #409eff; color: white; }
         
         /* 필터 탭 스타일 */
@@ -57,6 +69,7 @@
 </head>
 <body>
 
+<!-- 업무 공지 모달 -->
 <div class="modal-overlay" id="noticeModal">
     <div class="modal-content" style="border-top: 4px solid #409eff;">
         <h2 style="margin-top:0; color:#333;">📢 업무 공지</h2>
@@ -73,6 +86,7 @@
     </div>
 </div>
 
+<!-- 입력 및 검색 패널 -->
 <div class="input-panel">
     <div style="font-weight: bold; margin-bottom: 10px; font-size: 16px;">DB 고객 관리</div>
     <div class="search-row">
@@ -110,6 +124,7 @@
     </div>
 </div>
 
+<!-- 데이터 테이블 영역 -->
 <div class="container">
     <table>
         <thead>
@@ -126,18 +141,54 @@
 
 <div id="pagination" style="display:flex; justify-content:center; gap:6px; margin-top:15px; flex-wrap:wrap;"></div>
 
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal-content">
-        <h3 id="modalTitle">정보 수정</h3>
-        <input type="text" id="editName" placeholder="고객명" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-        <input type="text" id="editPhone" placeholder="전화번호" maxlength="13" oninput="formatPhone(this)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-        <input type="text" id="editBirth" placeholder="생년월일" maxlength="10" oninput="formatBirth(this)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
-        <textarea id="memoInput" class="memo-edit-area"></textarea>
+<!-- 우측 사이드 패널 (상세 정보 확인 및 수정) -->
+<div class="side-overlay" id="sideOverlay" onclick="closeSidePanel()"></div>
+<div class="side-panel" id="sidePanel">
+    <div style="display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:2px solid #f0f2f5; padding-bottom:10px;">
+        <h3 id="panelTitle" style="margin:0; color:#333; font-size:16px;">고객 상세 정보</h3>
+        <button onclick="closeSidePanel()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#999; margin-left:auto;">&times;</button>
+    </div>
+    
+    <div class="form-group">
+        <label>배분날짜</label>
+        <input type="date" id="editDate">
+    </div>
+    <div class="form-group">
+        <label>고객명</label>
+        <input type="text" id="editName" placeholder="고객명">
+    </div>
+    <div class="form-group">
+        <label>전화번호</label>
+        <input type="text" id="editPhone" placeholder="전화번호" maxlength="13" oninput="formatPhone(this)">
+    </div>
+    <div class="form-group">
+        <label>지역</label>
+        <input type="text" id="editRegion" placeholder="지역">
+    </div>
+    <div class="form-group">
+        <label>시도/구군</label>
+        <input type="text" id="editCity" placeholder="시도/구군">
+    </div>
+    <div class="form-group">
+        <label>생년월일</label>
+        <input type="text" id="editBirth" placeholder="생년월일" maxlength="12" oninput="formatBirth(this)">
+    </div>
+    <div class="form-group">
+        <label>성별</label>
+        <select id="editGender"><option value="남">남</option><option value="여">여</option></select>
+    </div>
+    <div class="form-group">
+        <label>현황 상태</label>
         <div class="option-list" id="optionList"></div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn add-btn" onclick="saveChanges()" style="flex:1">저장하기</button>
-            <button class="btn" onclick="closeModal()" style="flex:1; background:#ccc;">닫기</button>
-        </div>
+    </div>
+    <div class="form-group">
+        <label>메모 / 상담내용</label>
+        <textarea id="memoInput" class="memo-edit-area" placeholder="상담 내용을 적어주세요."></textarea>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-top: 20px; padding-bottom:30px;">
+        <button class="btn add-btn" onclick="saveChanges()" style="flex:1; padding:12px;">변화내역 저장</button>
+        <button class="btn" onclick="closeSidePanel()" style="flex:1; background:#f1f3f5; color:#333; padding:12px;">닫기</button>
     </div>
 </div>
 
@@ -174,7 +225,7 @@
     window.onload = async function() {
         checkNotice();
         document.getElementById('newDate').valueAsDate = new Date();
-        initModalOptions();
+        initPanelOptions();
     };
 
     function checkNotice() {
@@ -220,7 +271,7 @@
         renderTable();
     }
 
-    function initModalOptions() {
+    function initPanelOptions() {
         const container = document.getElementById('optionList');
         container.innerHTML = "";
         statuses.forEach(s => {
@@ -266,14 +317,14 @@
 
             tr.innerHTML = `
                 <td>${item.date}</td>
-                <td><strong>${item.name}</strong></td>
+                <td onclick="openSidePanel(${realIndex})" style="cursor:pointer; color:#409eff; text-decoration:underline;"><strong>${item.name}</strong></td>
                 <td><a href="tel:${item.phone}" style="text-decoration:none; color:#1890ff; font-weight:bold;">${item.phone}</a></td>
                 <td>${item.region}</td>
                 <td>${item.city}</td>
                 <td>${item.birth}</td>
                 <td>${item.gender}</td>
-                <td class="memo-cell" onclick="openEditModal(${realIndex})">${item.memo}</td>
-                <td style="cursor:pointer" onclick="openEditModal(${realIndex})"><span class="status-badge ${sClass}">${item.status}</span></td>
+                <td class="memo-cell" onclick="openSidePanel(${realIndex})">${item.memo}</td>
+                <td style="cursor:pointer" onclick="openSidePanel(${realIndex})"><span class="status-badge ${sClass}">${item.status}</span></td>
                 <td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow(${realIndex})">삭제</button></td>
             `;
             tbody.appendChild(tr);
@@ -340,6 +391,9 @@
             document.getElementById('newName').value = "";
             document.getElementById('newPhone').value = "";
             document.getElementById('newMemo').value = "";
+            document.getElementById('newRegion').value = "";
+            document.getElementById('newCity').value = "";
+            document.getElementById('newBirth').value = "";
         } catch(error){
             console.error(error);
             alert("저장 실패");
@@ -348,23 +402,42 @@
         }
     }
 
-    window.openEditModal = function(index) {
+    window.openSidePanel = function(index) {
         activeRowIndex = index;
         const item = customerData[index];
-        document.getElementById('modalTitle').innerText = `${item.name}님 정보 수정`;
-        document.getElementById('memoInput').value = item.memo;
-        document.getElementById('editName').value = item.name;
-        document.getElementById('editPhone').value = item.phone;
-        document.getElementById('editBirth').value = item.birth;
+        document.getElementById('panelTitle').innerText = `📋 ${item.name}님 상세 관리`;
+        
+        // 전체 데이터 인풋 맵핑
+        document.getElementById('editDate').value = item.date || "";
+        document.getElementById('editName').value = item.name || "";
+        document.getElementById('editPhone').value = item.phone || "";
+        document.getElementById('editRegion').value = item.region || "";
+        document.getElementById('editCity').value = item.city || "";
+        document.getElementById('editBirth').value = item.birth || "";
+        document.getElementById('editGender').value = item.gender || "남";
+        document.getElementById('memoInput').value = item.memo || "";
+        
         selectedStatus = item.status;
         Array.from(document.getElementById('optionList').children).forEach(opt => opt.classList.toggle('selected', opt.innerText === selectedStatus));
-        document.getElementById('modalOverlay').classList.add('active');
+        
+        // 사이드 패널 애니메이션 작동
+        document.getElementById('sideOverlay').classList.add('active');
+        document.getElementById('sidePanel').classList.add('active');
+    }
+
+    window.closeSidePanel = function() {
+        document.getElementById('sideOverlay').classList.remove('active');
+        document.getElementById('sidePanel').classList.remove('active');
     }
 
     window.saveChanges = async function() {
+        const editDate = document.getElementById('editDate').value;
         const editName = document.getElementById('editName').value;
         const editPhone = document.getElementById('editPhone').value;
+        const editRegion = document.getElementById('editRegion').value;
+        const editCity = document.getElementById('editCity').value;
         const editBirth = document.getElementById('editBirth').value;
+        const editGender = document.getElementById('editGender').value;
         const editMemo = document.getElementById('memoInput').value;
         
         if(!editName) return alert("고객명을 입력해주세요.");
@@ -376,19 +449,26 @@
         if(birthDate.getFullYear() !== year || birthDate.getMonth() !== month - 1 || birthDate.getDate() !== day) return alert("유효한 생년월일을 입력해주세요.");
         if(customerData.some((item, index) => item.phone === editPhone && index !== activeRowIndex)) return alert("이미 등록된 전화번호입니다.");
 
-        customerData[activeRowIndex].name = editName;
-        customerData[activeRowIndex].phone = editPhone;
-        customerData[activeRowIndex].birth = editBirth;
-        customerData[activeRowIndex].memo = editMemo;
-        customerData[activeRowIndex].status = selectedStatus;
+        const updatedFields = {
+            date: editDate,
+            name: editName,
+            phone: editPhone,
+            region: editRegion,
+            city: editCity,
+            birth: editBirth,
+            gender: editGender,
+            memo: editMemo,
+            status: selectedStatus
+        };
 
-        await updateDoc(doc(db, "customers", customerData[activeRowIndex].id), { name: editName, phone: editPhone, birth: editBirth, memo: editMemo, status: selectedStatus });
+        // 로컬 데이터 선반영 후 파이어베이스 업데이트
+        customerData[activeRowIndex] = { ...customerData[activeRowIndex], ...updatedFields };
+
+        await updateDoc(doc(db, "customers", customerData[activeRowIndex].id), updatedFields);
         renderTable();
-        closeModal();
-        alert("수정 완료");
+        closeSidePanel();
+        alert("수정 완료되었습니더!");
     };
-
-    window.closeModal = function() { document.getElementById('modalOverlay').classList.remove('active'); }
 
     window.deleteRow = async function(index) {
         if(confirm("정말 삭제하시겠습니까?")) {
