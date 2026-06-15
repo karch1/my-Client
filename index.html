@@ -24,7 +24,7 @@
         
         /* 테이블 영역 */
         .container { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
         
         /* [수정] white-space: nowrap 추가하여 모든 셀 줄바꿈 절대 방지 */
         th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
@@ -129,9 +129,9 @@
         <thead>
             <tr>
                 <th>배분날짜 <select class="sort-select" id="dateSortSelect" onchange="sortData('date', this.value)"><option value="none">정렬</option><option value="desc">최신순 ↓</option><option value="asc">과거순 ↑</option></select></th>
-                <th>고객명</th><th>전화번호</th><th>지역</th><th>구군</th><th>생년</th><th>성별</th><th>메모/상담내용</th>
+                <th>고객명</th><th>전화번호</th><th>지역</th><th>구군</th><th>생년</th><th style="min-width: 50px;">성별</th><th>메모/상담내용</th>
                 <th>현황 <select class="sort-select" id="statusSortSelect" onchange="sortData('status', this.value)"><option value="none">기본</option><option value="계약자">계약자</option><option value="2차성공">2차성공</option><option value="약속잡음">약속잡음</option><option value="부재">부재</option><option value="보류">보류</option><option value="취소">취소</option><option value="취소(AS)">취소(AS)</option></select></th>
-                <th>관리</th>
+                <th style="min-width: 70px;">관리</th>
             </tr>
         </thead>
         <tbody id="tableBody"></tbody>
