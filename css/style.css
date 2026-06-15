@@ -1,0 +1,52 @@
+/* 기본 스타일 */
+body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; font-size: 13px; color: #333; }
+.input-panel { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+.input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.input-grid input, .input-grid select { padding: 8px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 12px; }
+.search-row { display: flex; gap: 10px; margin-bottom: 15px; padding: 10px; background: #eef2f7; border-radius: 8px; }
+.search-row input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+.add-btn { background-color: #409eff; color: white; flex: 2; min-width: 120px; }
+.btn:hover { opacity: 0.8; }
+
+/* 테이블 영역 */
+.container { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; }
+table { width: 100%; border-collapse: collapse; min-width: 1400px; }
+th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
+th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-index: 10; }
+
+.sort-select { font-size: 10px; padding: 2px; margin-left: 5px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
+.status-badge { display: inline-block; padding: 4px 10px; border: 1px solid #dee2e6; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; min-width: 60px; }
+.status-contractor { background-color: #e6f7ff; border-color: #91d5ff; color: #1890ff; }
+.status-cancel { background-color: #fff1f0; border-color: #ffa39e; color: #e63946; }
+.status-db { background-color: #f5f5f5; border-color: #d9d9d9; color: #8c8c8c; }
+.status-appointment { background-color: #f6ffed; border-color: #b7eb8f; color: #52c41a; }
+.status-success { background-color: #e6f7ff; border-color: #91d5ff; color: #1890ff; }
+.status-default { background-color: #ffffff; color: #333; }
+.highlight-red { background-color: #fff8f8; color: #e63946 !important; font-weight: bold; }
+.highlight-blue { background-color: #f0f9ff; }
+.memo-cell { max-width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #666; }
+
+/* 모달 및 패널 */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal-content { width: 90%; max-width: 500px; background: white; border-radius: 15px; padding: 20px; }
+
+.side-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1050; }
+.side-overlay.active { display: block; }
+.side-panel { position: fixed; top: 0; right: 0; width: 85%; max-width: 420px; height: 100%; background: white; z-index: 1060; transform: translateX(100%); transition: transform 0.3s ease-in-out; padding: 20px; box-sizing: border-box; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.15); }
+.side-panel.active { transform: translateX(0); }
+
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 12px; }
+.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
+.memo-edit-area { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; resize: none; }
+.option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 5px; }
+.option-item { padding: 8px; text-align: center; border-radius: 6px; background: #f1f3f5; cursor: pointer; font-size: 11px; border: 1px solid transparent; font-weight: bold; }
+.option-item.selected { background: #409eff; color: white; }
+
+.filter-tab-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 5px; }
+.filter-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+.filter-btn:hover { background: #f0f0f0; }
+.filter-btn.active { background: #409eff; color: white; border-color: #409eff; }

@@ -5,69 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB관리 메모장</title>
     <link rel="manifest" href="manifest.json">
-
+    <link rel="stylesheet" href="css/style.css">
     <meta name="theme-color" content="#409eff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <style>
-        /* 기본 스타일 */
-        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; font-size: 13px; color: #333; }
-        .input-panel { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 10px; }
-        .input-grid input, .input-grid select { padding: 8px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 12px; }
-        .search-row { display: flex; gap: 10px; margin-bottom: 15px; padding: 10px; background: #eef2f7; border-radius: 8px; }
-        .search-row input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn { border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
-        .add-btn { background-color: #409eff; color: white; flex: 2; min-width: 120px; }
-        .btn:hover { opacity: 0.8; }
-        
-        /* 테이블 영역 */
-        .container { width: 100%; overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 600px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
-        
-        /* [수정] white-space: nowrap 추가하여 모든 셀 줄바꿈 절대 방지 */
-        th, td { padding: 12px 10px; border-bottom: 1px solid #eee; text-align: left; white-space: nowrap; }
-        th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-index: 10; }
-        
-        .sort-select { font-size: 10px; padding: 2px; margin-left: 5px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
-        .status-badge { display: inline-block; padding: 4px 10px; border: 1px solid #dee2e6; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; min-width: 60px; }
-        .status-contractor { background-color: #e6f7ff; border-color: #91d5ff; color: #1890ff; }
-        .status-cancel { background-color: #fff1f0; border-color: #ffa39e; color: #e63946; }
-        .status-db { background-color: #f5f5f5; border-color: #d9d9d9; color: #8c8c8c; }
-        .status-appointment { background-color: #f6ffed; border-color: #b7eb8f; color: #52c41a; }
-        .status-success { background-color: #e6f7ff; border-color: #91d5ff; color: #1890ff; }
-        .status-default { background-color: #ffffff; color: #333; }
-        .highlight-red { background-color: #fff8f8; color: #e63946 !important; font-weight: bold; }
-        .highlight-blue { background-color: #f0f9ff; }
-        .memo-cell { max-width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #666; }
-        
-        /* 공지사항 모달 전용 스타일 */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-overlay.active { display: flex; }
-        .modal-content { width: 90%; max-width: 500px; background: white; border-radius: 15px; padding: 20px; }
-
-        /* 무조건 우측에서 나오는 사이드 패널 스타일 (Drawer) */
-        .side-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1050; }
-        .side-overlay.active { display: block; }
-        .side-panel { position: fixed; top: 0; right: 0; width: 85%; max-width: 420px; height: 100%; background: white; z-index: 1060; transform: translateX(100%); transition: transform 0.3s ease-in-out; padding: 20px; box-sizing: border-box; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.15); }
-        .side-panel.active { transform: translateX(0); }
-        
-        /* 사이드 패널 내부 폼 레이아웃 */
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 12px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
-        .memo-edit-area { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; resize: none; }
-        .option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 5px; }
-        .option-item { padding: 8px; text-align: center; border-radius: 6px; background: #f1f3f5; cursor: pointer; font-size: 11px; border: 1px solid transparent; font-weight: bold; }
-        .option-item.selected { background: #409eff; color: white; }
-        
-        /* 필터 탭 스타일 */
-        .filter-tab-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 5px; }
-        .filter-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; transition: all 0.2s; }
-        .filter-btn:hover { background: #f0f0f0; }
-        .filter-btn.active { background: #409eff; color: white; border-color: #409eff; }
-    </style>
 </head>
 <body>
 
@@ -107,7 +47,6 @@
         </select>
         <input type="text" id="newMemo" placeholder="메모/상담내용" style="grid-column: span 2;">
     </div>
-
     <div class="filter-tab-row">
         <button class="filter-btn active" onclick="setFilter('ALL'); setActive(this)">전체</button>
         <button class="filter-btn" onclick="setFilter('계약자'); setActive(this)">계약자</button>
@@ -116,7 +55,6 @@
         <button class="filter-btn" onclick="setFilter('부재'); setActive(this)">부재</button>
         <button class="filter-btn" onclick="setFilter('보류'); setActive(this)">보류</button>
     </div>
-    
     <div class="btn-row">
         <button class="btn" onclick="googleLogin()" style="background:#222; color:white;">구글 로그인</button>
         <button class="btn" onclick="logout()" style="background:#999; color:white;">로그아웃</button>
@@ -137,375 +75,33 @@
         <tbody id="tableBody"></tbody>
     </table>
 </div>
-
 <div id="pagination" style="display:flex; justify-content:center; gap:6px; margin-top:15px; flex-wrap:wrap;"></div>
 
 <div class="side-overlay" id="sideOverlay" onclick="closeSidePanel()"></div>
 <div class="side-panel" id="sidePanel">
-    <div style="display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:2px solid #f0f2f5; padding-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #f0f2f5; padding-bottom:10px;">
         <h3 id="panelTitle" style="margin:0; color:#333; font-size:16px;">고객 상세 정보</h3>
-        <button onclick="closeSidePanel()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#999; margin-left:auto;">&times;</button>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <button onclick="deleteFromPanel()" style="background:#ff4d4f; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">삭제</button>
+            <button onclick="closeSidePanel()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#999;">&times;</button>
+        </div>
     </div>
-    
-    <div class="form-group">
-        <label>배분날짜</label>
-        <input type="date" id="editDate">
-    </div>
-    <div class="form-group">
-        <label>고객명</label>
-        <input type="text" id="editName" placeholder="고객명">
-    </div>
-    <div class="form-group">
-        <label>전화번호</label>
-        <input type="text" id="editPhone" placeholder="전화번호" maxlength="13" oninput="formatPhone(this)">
-    </div>
-    <div class="form-group">
-        <label>지역</label>
-        <input type="text" id="editRegion" placeholder="지역">
-    </div>
-    <div class="form-group">
-        <label>시도/구군</label>
-        <input type="text" id="editCity" placeholder="시도/구군">
-    </div>
-    <div class="form-group">
-        <label>생년월일</label>
-        <input type="text" id="editBirth" placeholder="생년월일" maxlength="12" oninput="formatBirth(this)">
-    </div>
-    <div class="form-group">
-        <label>성별</label>
-        <select id="editGender"><option value="남">남</option><option value="여">여</option></select>
-    </div>
-    <div class="form-group">
-        <label>현황 상태</label>
-        <div class="option-list" id="optionList"></div>
-    </div>
-    <div class="form-group">
-        <label>메모 / 상담내용</label>
-        <textarea id="memoInput" class="memo-edit-area" placeholder="상담 내용을 적어주세요."></textarea>
-    </div>
-    
+    <div class="form-group"><label>배분날짜</label><input type="date" id="editDate"></div>
+    <div class="form-group"><label>고객명</label><input type="text" id="editName"></div>
+    <div class="form-group"><label>전화번호</label><input type="text" id="editPhone" maxlength="13" oninput="formatPhone(this)"></div>
+    <div class="form-group"><label>지역</label><input type="text" id="editRegion"></div>
+    <div class="form-group"><label>시도/구군</label><input type="text" id="editCity"></div>
+    <div class="form-group"><label>생년월일</label><input type="text" id="editBirth" maxlength="12" oninput="formatBirth(this)"></div>
+    <div class="form-group"><label>성별</label><select id="editGender"><option value="남">남</option><option value="여">여</option></select></div>
+    <div class="form-group"><label>현황 상태</label><div class="option-list" id="optionList"></div></div>
+    <div class="form-group"><label>메모 / 상담내용</label><textarea id="memoInput" class="memo-edit-area"></textarea></div>
     <div style="display: flex; gap: 10px; margin-top: 20px; padding-bottom:30px;">
         <button class="btn add-btn" onclick="saveChanges()" style="flex:1; padding:12px;">변화내역 저장</button>
         <button class="btn" onclick="closeSidePanel()" style="flex:1; background:#f1f3f5; color:#333; padding:12px;">닫기</button>
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+<script type="module" src="js/script.js"></script>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyC8CiV8yujqwa0ovgwQ8_Y47ucHlSzQcIE",
-        authDomain: "my-client-dc700.firebaseapp.com",
-        projectId: "my-client-dc700",
-        storageBucket: "my-client-dc700.firebasestorage.app",
-        messagingSenderId: "117891017561",
-        appId: "1:117891017561:web:e2a5266154d112c568fa48"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const customerRef = collection(db, "customers");
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-        
-    let customerData = [];
-    let activeRowIndex = null;
-    let selectedStatus = "";
-    let currentPage = 1;
-    let isSaving = false;
-    const rowsPerPage = 10;
-    const statuses = ['계약자', '2차성공', '약속잡음', '부재', '보류', '취소', '취소(AS)'];
-    const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '부재': 3, '보류': 4, '취소': 5, '취소(AS)': 6 };
-    let currentFilter = "ALL";
-
-    window.onload = async function() {
-        checkNotice();
-        document.getElementById('newDate').valueAsDate = new Date();
-        initPanelOptions();
-    };
-
-    function checkNotice() {
-        const hideUntil = localStorage.getItem('hideNoticeUntil');
-        if (!hideUntil || new Date().getTime() > hideUntil) document.getElementById('noticeModal').classList.add('active');
-    }
-
-    window.closeNotice = function() {
-        if (document.getElementById('hideNotice').checked) localStorage.setItem('hideNoticeUntil', new Date().getTime() + (24 * 60 * 60 * 1000));
-        document.getElementById('noticeModal').classList.remove('active');
-    }
-
-    function loadCustomers() {
-        onSnapshot(customerRef, (snapshot) => {
-            customerData = [];
-            snapshot.forEach((docItem) => {
-                customerData.push({ id: docItem.id, ...docItem.data() });
-            });
-            customerData.sort((a,b) => new Date(a.date) - new Date(b.date));
-            renderTable();
-        });
-    }
-    
-    window.setFilter = function(status) {
-        currentFilter = status;
-        currentPage = 1;
-        renderTable();
-    };
-        
-    window.sortData = function(field, type) {
-        if (type === 'none') {
-            customerData.sort((a,b) => new Date(b.date) - new Date(a.date));
-        } else {
-            customerData.sort((a, b) => {
-                if (field === 'date') return type === 'asc' ? new Date(a.date) - new Date(b.date) : new Date(b.date) - new Date(a.date);
-                if (field === 'status') {
-                    if (a.status === type && b.status !== type) return -1;
-                    if (a.status !== type && b.status === type) return 1;
-                    return (statusPriority[a.status] || 99) - (statusPriority[b.status] || 99);
-                }
-            });
-        }
-        renderTable();
-    }
-
-    function initPanelOptions() {
-        const container = document.getElementById('optionList');
-        container.innerHTML = "";
-        statuses.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'option-item';
-            div.innerText = s;
-            div.onclick = () => {
-                selectedStatus = s;
-                Array.from(container.children).forEach(child => child.classList.remove('selected'));
-                div.classList.add('selected');
-            };
-            container.appendChild(div);
-        });
-    }
-
-    window.renderTable = function() {
-        const tbody = document.getElementById('tableBody');
-        const pagination = document.getElementById('pagination');
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        tbody.innerHTML = "";
-        
-        let filteredData = customerData.filter(item => {
-            const matchSearch = !searchTerm || JSON.stringify(item).toLowerCase().includes(searchTerm);
-            const matchStatus = (currentFilter === "ALL") || (item.status === currentFilter);
-            return matchSearch && matchStatus;
-        });
-        
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-        if(currentPage > totalPages) currentPage = 1;
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        const pageData = filteredData.slice(start, end);
-
-        pageData.forEach((item) => {
-            const realIndex = customerData.findIndex(data => data.id === item.id);
-            const tr = document.createElement('tr');
-            let sClass = "status-default";
-            if(item.status === '계약자'){ sClass = "status-contractor"; tr.className = "highlight-blue"; }
-            else if(item.status === '약속잡음'){ sClass = "status-appointment"; }
-            else if(item.status === '취소' || item.status === '취소(AS)'){ sClass = "status-cancel"; tr.className = "highlight-red"; }
-            else if(item.status === '2차성공'){ sClass = "status-success"; }
-            else if(item.status === '부재' || item.status === '보류'){ sClass = "status-db"; }
-
-            tr.innerHTML = `
-                <td>${item.date}</td>
-                <td onclick="openSidePanel(${realIndex})" style="cursor:pointer; color:#409eff; text-decoration:underline;"><strong>${item.name}</strong></td>
-                <td><a href="tel:${item.phone}" style="text-decoration:none; color:#1890ff; font-weight:bold;">${item.phone}</a></td>
-                <td>${item.region}</td>
-                <td>${item.city}</td>
-                <td>${item.birth}</td>
-                <td>${item.gender}</td>
-                <td class="memo-cell" onclick="openSidePanel(${realIndex})">${item.memo}</td>
-                <td style="cursor:pointer" onclick="openSidePanel(${realIndex})"><span class="status-badge ${sClass}">${item.status}</span></td>
-                <td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow(${realIndex})">삭제</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        pagination.innerHTML = "";
-        for(let i = 1; i <= totalPages; i++){
-            const btn = document.createElement('button');
-            btn.innerText = i;
-            btn.className = 'btn';
-            btn.style.background = i === currentPage ? '#409eff' : '#ddd';
-            btn.style.color = i === currentPage ? 'white' : 'black';
-            btn.style.padding = '6px 10px';
-            btn.onclick = () => { currentPage = i; renderTable(); };
-            pagination.appendChild(btn);
-        }
-    };
-
-    window.formatPhone = function(input){
-        let value = input.value.replace(/\D/g,'');
-        if(value.length < 4) input.value = value;
-        else if(value.length < 8) input.value = value.replace(/(\d{3})(\d+)/, '$1-$2');
-        else input.value = value.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
-    };
-
-    window.formatBirth = function(input){
-        let value = input.value.replace(/\D/g,'');
-        if(value.length < 5) input.value = value;
-        else if(value.length < 7) input.value = value.replace(/(\d{4})(\d+)/, '$1-$2');
-        else input.value = value.replace(/(\d{4})(\d{2})(\d+)/, '$1-$2-$3');
-    };
-
-    window.addNewRow = async function() {
-        if(isSaving) return;
-        isSaving = true;
-        try {
-            const newItem = {
-                date: document.getElementById('newDate').value,
-                name: document.getElementById('newName').value,
-                phone: document.getElementById('newPhone').value,
-                region: document.getElementById('newRegion').value,
-                city: document.getElementById('newCity').value,
-                birth: document.getElementById('newBirth').value,
-                gender: document.getElementById('newGender').value,
-                status: document.getElementById('newStatus').value,
-                memo: document.getElementById('newMemo').value
-            };
-
-            if(!newItem.name) return alert("고객명은 필수입니다.");
-            if(!/^010-\d{4}-\d{4}$/.test(newItem.phone)) return alert("전화번호 형식이 올바르지 않습니다.");
-            if(!/^\d{4}-\d{2}-\d{2}$/.test(newItem.birth)) return alert("생년월일 형식이 올바르지 않습니다.");
-
-            const [year, month, day] = newItem.birth.split('-').map(Number);
-            const birthDate = new Date(year, month - 1, day);
-            if(birthDate.getFullYear() !== year || birthDate.getMonth() !== month - 1 || birthDate.getDate() !== day){
-                return alert("유효한 생년월일을 입력해주세요.");
-            }
-
-            if(customerData.some(item => item.phone === newItem.phone)){
-                return alert("이미 등록된 전화번호입니다.");
-            }
-
-            await addDoc(customerRef, newItem);
-            document.getElementById('newName').value = "";
-            document.getElementById('newPhone').value = "";
-            document.getElementById('newMemo').value = "";
-            document.getElementById('newRegion').value = "";
-            document.getElementById('newCity').value = "";
-            document.getElementById('newBirth').value = "";
-        } catch(error){
-            console.error(error);
-            alert("저장 실패");
-        } finally {
-            isSaving = false;
-        }
-    }
-
-    window.openSidePanel = function(index) {
-        activeRowIndex = index;
-        const item = customerData[index];
-        document.getElementById('panelTitle').innerText = `📋 ${item.name}님 상세 관리`;
-        
-        // 전체 데이터 인풋 맵핑
-        document.getElementById('editDate').value = item.date || "";
-        document.getElementById('editName').value = item.name || "";
-        document.getElementById('editPhone').value = item.phone || "";
-        document.getElementById('editRegion').value = item.region || "";
-        document.getElementById('editCity').value = item.city || "";
-        document.getElementById('editBirth').value = item.birth || "";
-        document.getElementById('editGender').value = item.gender || "남";
-        document.getElementById('memoInput').value = item.memo || "";
-        
-        selectedStatus = item.status;
-        Array.from(document.getElementById('optionList').children).forEach(opt => opt.classList.toggle('selected', opt.innerText === selectedStatus));
-        
-        // 사이드 패널 애니메이션 작동
-        document.getElementById('sideOverlay').classList.add('active');
-        document.getElementById('sidePanel').classList.add('active');
-    }
-
-    window.closeSidePanel = function() {
-        document.getElementById('sideOverlay').classList.remove('active');
-        document.getElementById('sidePanel').classList.remove('active');
-    }
-
-    window.saveChanges = async function() {
-        const editDate = document.getElementById('editDate').value;
-        const editName = document.getElementById('editName').value;
-        const editPhone = document.getElementById('editPhone').value;
-        const editRegion = document.getElementById('editRegion').value;
-        const editCity = document.getElementById('editCity').value;
-        const editBirth = document.getElementById('editBirth').value;
-        const editGender = document.getElementById('editGender').value;
-        const editMemo = document.getElementById('memoInput').value;
-        
-        if(!editName) return alert("고객명을 입력해주세요.");
-        if(!/^010-\d{4}-\d{4}$/.test(editPhone)) return alert("전화번호 형식이 올바르지 않습니다.");
-        if(!/^\d{4}-\d{2}-\d{2}$/.test(editBirth)) return alert("생년월일 형식이 올바르지 않습니다.");
-        
-        const [year, month, day] = editBirth.split('-').map(Number);
-        const birthDate = new Date(year, month - 1, day);
-        if(birthDate.getFullYear() !== year || birthDate.getMonth() !== month - 1 || birthDate.getDate() !== day) return alert("유효한 생년월일을 입력해주세요.");
-        if(customerData.some((item, index) => item.phone === editPhone && index !== activeRowIndex)) return alert("이미 등록된 전화번호입니다.");
-
-        const updatedFields = {
-            date: editDate,
-            name: editName,
-            phone: editPhone,
-            region: editRegion,
-            city: editCity,
-            birth: editBirth,
-            gender: editGender,
-            memo: editMemo,
-            status: selectedStatus
-        };
-
-        // 로컬 데이터 선반영 후 파이어베이스 업데이트
-        customerData[activeRowIndex] = { ...customerData[activeRowIndex], ...updatedFields };
-
-        await updateDoc(doc(db, "customers", customerData[activeRowIndex].id), updatedFields);
-        renderTable();
-        closeSidePanel();
-        alert("수정 완료되었습니더!");
-    };
-
-    window.deleteRow = async function(index) {
-        if(confirm("정말 삭제하시겠습니까?")) {
-            await deleteDoc(doc(db, "customers", customerData[index].id));
-            customerData.splice(index, 1);
-            renderTable();
-        }
-    };
-
-    window.googleLogin = async function () {
-        try {
-            const result = await signInWithPopup(auth, provider);
-            if(result.user.email !== "choae000@gmail.com"){ alert("허용된 계정이 아닙니다."); await signOut(auth); return; }
-            alert("로그인 성공");
-            loadCustomers();
-        } catch(error){ console.error(error); alert("로그인 실패"); }
-    };
-
-    window.logout = async function(){ await signOut(auth); customerData = []; renderTable(); alert("로그아웃 완료"); };
-
-    onAuthStateChanged(auth, async(user)=>{
-        if(user){
-            if(user.email === "choae000@gmail.com") loadCustomers();
-            else { await signOut(auth); alert("허용되지 않은 계정"); }
-        } else { customerData = []; renderTable(); }
-    });
-
-    window.setActive = function(btn) {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    };
-
-    if("serviceWorker" in navigator){
-         window.addEventListener("load", () => {
-            navigator.serviceWorker.register("./service-worker.js")
-                .then(() => { console.log("SW 등록 완료"); })
-                .catch((err) => { console.log("SW 실패", err); });
-        });
-    }
-</script>
 </body>
 </html>
