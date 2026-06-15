@@ -31,20 +31,20 @@ const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '�
 let currentFilter = "ALL"; // 현재 적용된 상태 필터
 
 /**
- * [5] 함수들을 window 객체에 할당 (전역 노출)
- * HTML 파일의 onclick 이벤트에서 직접 호출할 수 있도록 window 객체에 바인딩합니다.
+ * [5] 전역 함수 등록 (window 객체 사용)
+ * HTML 파일 내 onclick 이벤트에서 모듈 내부 함수를 호출하기 위해 전역 객체에 할당합니다.
  */
 
-// 공지사항 모달 닫기 및 '오늘 하루 보지 않기' 처리
+// 공지사항 모달 닫기
 window.closeNotice = function() { 
     if (document.getElementById('hideNotice').checked) localStorage.setItem('hideNoticeUntil', new Date().getTime() + (24 * 60 * 60 * 1000)); 
     document.getElementById('noticeModal').classList.remove('active'); 
 };
 
-// 상단 필터 버튼 클릭 시 데이터 필터링
+// 상태별 데이터 필터링
 window.setFilter = function(status) { currentFilter = status; currentPage = 1; renderTable(); };
 
-// 테이블 헤더 정렬 기능
+// 데이터 정렬
 window.sortData = function(field, type) { 
     if (type === 'none') customerData.sort((a,b) => new Date(b.date) - new Date(a.date)); 
     else { customerData.sort((a, b) => { 
@@ -54,7 +54,7 @@ window.sortData = function(field, type) {
     renderTable(); 
 };
 
-// 고객 리스트 테이블을 HTML에 렌더링 (검색/필터/페이징 처리)
+// 테이블 렌더링 (상태별 색상 및 데이터 반영)
 window.renderTable = function() { 
     const tbody = document.getElementById('tableBody'); 
     const pagination = document.getElementById('pagination'); 
@@ -73,22 +73,36 @@ window.renderTable = function() {
     pageData.forEach((item) => { 
         const realIndex = customerData.findIndex(data => data.id === item.id); 
         const tr = document.createElement('tr'); 
-        tr.innerHTML = `<td>${item.date}</td><td onclick="openSidePanel(${realIndex})" style="cursor:pointer; color:#409eff; text-decoration:underline;"><strong>${item.name}</strong></td><td><a href="tel:${item.phone}" style="text-decoration:none; color:#1890ff; font-weight:bold;">${item.phone}</a></td><td>${item.region}</td><td>${item.city}</td><td>${item.birth}</td><td>${item.gender}</td><td class="memo-cell" onclick="openSidePanel(${realIndex})">${item.memo}</td><td style="cursor:pointer" onclick="openSidePanel(${realIndex})"><span class="status-badge">${item.status}</span></td><td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow(${realIndex})">삭제</button></td>`; 
+        
+        // 상태에 따른 클래스 지정
+        let sClass = "status-default"; 
+        if(item.status === '계약자'){ sClass = "status-contractor"; tr.className = "highlight-blue"; } 
+        else if(item.status === '약속잡음'){ sClass = "status-appointment"; } 
+        else if(item.status === '취소' || item.status === '취소(AS)'){ sClass = "status-cancel"; tr.className = "highlight-red"; } 
+        else if(item.status === '2차성공'){ sClass = "status-success"; } 
+        else if(item.status === '부재' || item.status === '보류'){ sClass = "status-db"; } 
+
+        tr.innerHTML = `<td>${item.date}</td>
+        <td onclick="openSidePanel(${realIndex})" style="cursor:pointer; color:#409eff; text-decoration:underline;"><strong>${item.name}</strong></td>
+        <td><a href="tel:${item.phone}" style="text-decoration:none; color:#1890ff; font-weight:bold;">${item.phone}</a></td>
+        <td>${item.region}</td><td>${item.city}</td><td>${item.birth}</td><td>${item.gender}</td>
+        <td class="memo-cell" onclick="openSidePanel(${realIndex})">${item.memo}</td>
+        <td style="cursor:pointer" onclick="openSidePanel(${realIndex})"><span class="status-badge ${sClass}">${item.status}</span></td>
+        <td><button class="btn" style="padding:4px 8px; font-size:10px; background:#ff4d4f; color:white;" onclick="deleteRow(${realIndex})">삭제</button></td>`; 
         tbody.appendChild(tr); 
     }); 
     
-    // 페이지네이션 번호 생성
     pagination.innerHTML = ""; 
     for(let i = 1; i <= totalPages; i++){ 
         const btn = document.createElement('button'); btn.innerText = i; btn.className = 'btn'; btn.style.background = i === currentPage ? '#409eff' : '#ddd'; btn.onclick = () => { currentPage = i; renderTable(); }; pagination.appendChild(btn); 
     } 
 };
 
-// 입력 폼 자동 포맷팅 함수들
+// 입력 폼 포맷팅
 window.formatPhone = function(input){ let value = input.value.replace(/\D/g,''); if(value.length < 4) input.value = value; else if(value.length < 8) input.value = value.replace(/(\d{3})(\d+)/, '$1-$2'); else input.value = value.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3'); };
 window.formatBirth = function(input){ let value = input.value.replace(/\D/g,''); if(value.length < 5) input.value = value; else if(value.length < 7) input.value = value.replace(/(\d{4})(\d+)/, '$1-$2'); else input.value = value.replace(/(\d{4})(\d{2})(\d+)/, '$1-$2-$3'); };
 
-// 새 고객 정보 추가
+// 데이터 추가
 window.addNewRow = async function() { 
     if(isSaving) return; isSaving = true; 
     try { 
@@ -97,7 +111,7 @@ window.addNewRow = async function() {
     } catch(e) { console.error(e); } finally { isSaving = false; } 
 };
 
-// 상세 정보 사이드 패널 열기
+// 사이드 패널 제어
 window.openSidePanel = function(index) { 
     activeRowIndex = index; 
     const item = customerData[index]; 
@@ -107,22 +121,20 @@ window.openSidePanel = function(index) {
     Array.from(document.getElementById('optionList').children).forEach(opt => opt.classList.toggle('selected', opt.innerText === selectedStatus)); 
     document.getElementById('sideOverlay').classList.add('active'); document.getElementById('sidePanel').classList.add('active'); 
 };
-
-// 사이드 패널 닫기
 window.closeSidePanel = function() { document.getElementById('sideOverlay').classList.remove('active'); document.getElementById('sidePanel').classList.remove('active'); };
 
-// 패널에서 수정된 내용 저장
+// 수정사항 저장
 window.saveChanges = async function() { 
     const updatedFields = { date: document.getElementById('editDate').value, name: document.getElementById('editName').value, phone: document.getElementById('editPhone').value, region: document.getElementById('editRegion').value, city: document.getElementById('editCity').value, birth: document.getElementById('editBirth').value, gender: document.getElementById('editGender').value, memo: document.getElementById('memoInput').value, status: selectedStatus }; 
     await updateDoc(doc(db, "customers", customerData[activeRowIndex].id), updatedFields); 
     renderTable(); closeSidePanel(); 
 };
 
-// 데이터 삭제 기능
+// 데이터 삭제
 window.deleteRow = async function(index) { if(confirm("삭제?")) { await deleteDoc(doc(db, "customers", customerData[index].id)); customerData.splice(index, 1); renderTable(); } };
 window.deleteFromPanel = async function() { if(confirm("삭제?")) { await deleteDoc(doc(db, "customers", customerData[activeRowIndex].id)); customerData.splice(activeRowIndex, 1); renderTable(); closeSidePanel(); } };
 
-// 구글 인증
+// 인증 및 기타
 window.googleLogin = async function () { try { await signInWithPopup(auth, provider); } catch(e) { alert("로그인 실패"); } };
 window.logout = async function(){ await signOut(auth); };
 window.setActive = function(btn) { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); };
@@ -130,8 +142,6 @@ window.setActive = function(btn) { document.querySelectorAll('.filter-btn').forE
 /**
  * [6] 초기화 및 이벤트 리스너
  */
-
-// 사용자 로그인 상태 변화 감지 (로그인 시 데이터 자동 로드)
 onAuthStateChanged(auth, (user) => { 
     if(user && user.email === "choae000@gmail.com") {
         onSnapshot(customerRef, (snapshot) => { 
@@ -142,7 +152,6 @@ onAuthStateChanged(auth, (user) => {
     } else { customerData = []; renderTable(); }
 });
 
-// 페이지 로드 시 초기 작업
 window.onload = function() { 
     document.getElementById('newDate').valueAsDate = new Date(); 
     const container = document.getElementById('optionList'); 
@@ -153,5 +162,5 @@ window.onload = function() {
     }); 
 };
 
-// 서비스 워커(PWA) 등록
+// 서비스 워커 등록
 if("serviceWorker" in navigator){ window.addEventListener("load", () => { navigator.serviceWorker.register("./service-worker.js"); }); }
