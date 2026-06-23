@@ -146,7 +146,7 @@ window.openSidePanel = function(index) {
         const memoListContainer = document.getElementById('sideMemoList');
         memoListContainer.innerHTML = '';
         
-        // [수정 보완] 최초 배분 당시 적었던 오리지널 메모를 무조건 리스트 최상단에 고정 표시
+        // 최초 배분 당시 적었던 오리지널 메모를 무조건 리스트 최상단에 고정 표시
         const firstCard = document.createElement('div');
         firstCard.className = 'side-memo-card';
         firstCard.style.borderTop = '4px solid #409eff'; // 최초 메모는 파란색 테이프로 차별화
@@ -163,16 +163,23 @@ window.openSidePanel = function(index) {
         // 이후 추가된 누적 상담 이력 쪽지들 바인딩
         snapshot.forEach((doc) => {
             const memoData = doc.data();
+            const memoId = doc.id;
             const card = document.createElement('div');
             card.className = 'side-memo-card';
             
-            // 쪽지 카드 툭 터치 시 위아래 펼쳐지는 애니메이션 클래스 토글
-            card.onclick = function() { this.classList.toggle('expanded'); };
+            // 쪽지 카드 툭 터치 시 위아래 펼쳐지는 애니메이션 클래스 토글 (단, 버튼 누를 때는 토글 안 되게 처리)
+            card.onclick = function(e) { 
+                if(e.target.tagName !== 'BUTTON') this.classList.toggle('expanded'); 
+            };
             
             card.innerHTML = `
                 <div class="side-memo-header">
                     <p class="side-memo-title">📌 ${memoData.title}</p>
-                    <span style="font-size:10px; color:#aaa;">${memoData.date}</span>
+                    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        <span style="font-size:10px; color:#aaa; margin-right:4px;">${memoData.date}</span>
+                        <button onclick="editCustomerMemo('${item.id}', '${memoId}', \`${memoData.title.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`, \`${memoData.content.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)" style="background:#f1f3f5; border:1px solid #ccc; font-size:10px; padding:2px 5px; border-radius:3px; cursor:pointer;">✏️</button>
+                        <button onclick="deleteCustomerMemo('${item.id}', '${memoId}')" style="background:#fff1f0; border:1px solid #ffa39e; color:#ff4d4f; font-size:10px; padding:2px 5px; border-radius:3px; cursor:pointer;">❌</button>
+                    </div>
                 </div>
                 <div class="side-memo-content">${memoData.content}</div>
             `;
@@ -217,6 +224,44 @@ window.addCustomerMemo = async function() {
     } catch (e) {
         console.error("메모 저장 실패:", e);
         alert("메모를 저장하지 못했습니다.");
+    }
+};
+
+// [신규 추가] 특정 상담 쪽지 메모 수정 로직
+window.editCustomerMemo = async function(customerId, memoId, currentTitle, currentContent) {
+    const newTitle = prompt("수정할 메모 제목을 입력하세요:", currentTitle);
+    if (newTitle === null) return; // 취소 클릭 시
+    
+    const newContent = prompt("수정할 메모 상세 내용을 입력하세요:", currentContent);
+    if (newContent === null) return; // 취소 클릭 시
+    
+    if (!newTitle.trim() || !newContent.trim()) {
+        alert("제목과 내용을 모두 채워야 수정이 완료됩니다.");
+        return;
+    }
+    
+    try {
+        const targetMemoDoc = doc(db, "customers", customerId, "memos", memoId);
+        await updateDoc(targetMemoDoc, {
+            title: newTitle.trim(),
+            content: newContent.trim()
+        });
+    } catch (e) {
+        console.error("메모 수정 에러:", e);
+        alert("메모를 수정하지 못했습니다.");
+    }
+};
+
+// [신규 추가] 특정 상담 쪽지 메모 삭제 로직
+window.deleteCustomerMemo = async function(customerId, memoId) {
+    if (!confirm("이 상담 기록 쪽지를 삭제하시겠습니까?")) return;
+    
+    try {
+        const targetMemoDoc = doc(db, "customers", customerId, "memos", memoId);
+        await deleteDoc(targetMemoDoc);
+    } catch (e) {
+        console.error("메모 삭제 에러:", e);
+        alert("메모를 삭제하지 못했습니다.");
     }
 };
 
