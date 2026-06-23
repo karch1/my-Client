@@ -42,8 +42,25 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
 .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 12px; }
 .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
 .memo-edit-area { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; resize: none; }
-.option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 5px; }
-.option-item { padding: 8px; text-align: center; border-radius: 6px; background: #f1f3f5; cursor: pointer; font-size: 11px; border: 1px solid transparent; font-weight: bold; }
+
+/* 🛠️ [1번 요청 해결] 모바일 화면에서 현황 상태 버튼 글자 세로 쪼개짐 완벽 수정 */
+.option-list { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* 화면 폭에 맞춰 자동 열 분할 및 최소 너비 보장 */
+    gap: 6px; 
+    margin-top: 5px; 
+}
+.option-item { 
+    padding: 8px 4px; /* 좌우 여백을 줄여 모바일 글자 생존 공간 확보 */
+    text-align: center; 
+    border-radius: 6px; 
+    background: #f1f3f5; 
+    cursor: pointer; 
+    font-size: 12px; 
+    border: 1px solid transparent; 
+    font-weight: bold; 
+    white-space: nowrap; /* 💥 중요: 글자가 절대로 아래로 떨어지거나 쪼개지지 않게 강제 지정 */
+}
 .option-item.selected { background: #409eff; color: white; }
 
 .filter-tab-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 5px; }
@@ -51,8 +68,10 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
 .filter-btn:hover { background: #f0f0f0; }
 .filter-btn.active { background: #409eff; color: white; border-color: #409eff; }
 
-/*  사이드 패널 내 상담 히스토리 쪽지 카드 디자인 */
 
+/* ======================================================== */
+/* 💡 사이드 패널 내 상담 히스토리 쪽지 카드 디자인 */
+/* ======================================================== */
 .side-memo-card {
     background: #fffbe0;             /* 은은한 노란 메모지 색상 */
     border-top: 4px solid #ff7675;   /* 위에 마스킹 테이프 붙인 포인트 */
@@ -74,9 +93,8 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* 클릭하여 활성화(expanded) 되었을 때 부드럽게 늘어나는 최대 높이 지정 */
 .side-memo-card.expanded {
-    max-height: 400px;
+    max-height: none;                /* 💥 최대 높이 제한을 없애 장문의 상담글도 100% 노출 */
     transform: rotate(0.3deg);       /* 아날로그 쪽지 느낌으로 미세하게 삐뚤어짐 */
 }
 
@@ -116,7 +134,9 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
 }
 
 
-/* 모달 및 레이아웃 디테일 CSS화 */
+/* ======================================================== */
+/* 💡 모달 및 레이아웃 디테일 CSS화 */
+/* ======================================================== */
 
 /* 1. 업무 공지사항 모달창 디테일 제어 */
 #noticeModal .modal-content {
@@ -272,7 +292,10 @@ th:last-child { min-width: 70px; }    /* 관리 */
     color: #333;
 }
 
-/* 9. [신규 이식] 상담 이력 수정 전용 그래픽 모달 테마 */
+/* 9. 상담 이력 수정 전용 그래픽 모달 테마 */
+#memoEditModal {
+    z-index: 2000 !important; 
+}
 #memoEditModal .modal-content {
     max-width: 380px; 
     border-radius: 12px; 
