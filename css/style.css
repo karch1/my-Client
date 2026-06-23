@@ -51,10 +51,8 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
 .filter-btn:hover { background: #f0f0f0; }
 .filter-btn.active { background: #409eff; color: white; border-color: #409eff; }
 
+/*  사이드 패널 내 상담 히스토리 쪽지 카드 디자인 */
 
-/* ======================================================== */
-/* 💡 [신규 추가] 사이드 패널 내 상담 히스토리 쪽지 카드 디자인 */
-/* ======================================================== */
 .side-memo-card {
     background: #fffbe0;             /* 은은한 노란 메모지 색상 */
     border-top: 4px solid #ff7675;   /* 위에 마스킹 테이프 붙인 포인트 */
@@ -63,10 +61,11 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
     padding: 12px 15px;
     cursor: pointer;
     overflow: hidden;
-    max-height: 42px;                /* 닫혀있을 때 딱 제목과 날짜만 보일 높이 설정 */
+    max-height: 44px;                /* 닫혀있을 때 딱 제목과 날짜만 보일 높이 설정 */
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
+    margin-bottom: 12px;
 }
 
 /* 터치하거나 마우스 오버 시 들리는 느낌 효과 */
@@ -85,7 +84,7 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 18px;
+    height: 20px;
 }
 
 .side-memo-title {
@@ -96,7 +95,7 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    width: 75%;
+    width: 62%;                      /* 버튼 크기 확보를 위해 타이틀 너비 제한 */
 }
 
 /* 본문 내용이 드러나는 절취선 영역 */
@@ -114,4 +113,235 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
 
 .side-memo-card.expanded .side-memo-content {
     opacity: 1;
+}
+
+
+/* 모달 및 레이아웃 디테일 CSS화 */
+
+/* 1. 업무 공지사항 모달창 디테일 제어 */
+#noticeModal .modal-content {
+    border-top: 4px solid #409eff;
+}
+#noticeModal .modal-content h2 {
+    margin-top: 0; 
+    color: #333;
+}
+#noticeModal .modal-content div:first-of-type {
+    background: #f8f9fa; 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin: 15px 0; 
+    line-height: 1.6; 
+    font-size: 14px;
+}
+#noticeModal .modal-content div:last-of-type {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+#noticeModal .modal-content label {
+    cursor: pointer; 
+    font-size: 12px; 
+    color: #666;
+}
+#noticeModal .modal-content .btn {
+    flex: none; 
+    width: 80px; 
+    padding: 8px;
+}
+
+/* 2. 입력 패널 및 데이터 검색 레이아웃 */
+.input-panel > div:first-child {
+    font-weight: bold; 
+    margin-bottom: 10px; 
+    font-size: 16px;
+}
+.search-row span {
+    align-self: center; 
+    font-weight: bold;
+}
+
+/* 3. 입력 그리드 내 최초 메모 영역 가로 크기 2칸 강제 확장 */
+#newMemo {
+    grid-column: span 2;
+}
+
+/* 4. 메인 테이블 헤더 최소 너비 세부 지정 */
+th:nth-child(7) { min-width: 50px; }  /* 성별 */
+th:last-child { min-width: 70px; }    /* 관리 */
+
+/* 5. 페이지네이션 컨테이너 가로 정렬 */
+#pagination {
+    display: flex; 
+    justify-content: center; 
+    gap: 6px; 
+    margin-top: 15px; 
+    flex-wrap: wrap;
+}
+
+/* 6. 사이드 슬라이드 패널 상단 헤더 정렬 */
+.side-panel > div:first-child {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
+    border-bottom: 2px solid #f0f2f5; 
+    padding-bottom: 10px;
+}
+.side-panel > div:first-child h3 {
+    margin: 0; 
+    color: #333; 
+    font-size: 16px;
+}
+.side-panel > div:first-child div {
+    display: flex; 
+    gap: 10px; 
+    align-items: center;
+}
+.side-panel > div:first-child button:first-child {
+    background: #ff4d4f; 
+    color: white; 
+    border: none; 
+    padding: 5px 10px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 11px; 
+    font-weight: bold;
+}
+.side-panel > div:first-child button:last-child {
+    background: none; 
+    border: none; 
+    font-size: 20px; 
+    cursor: pointer; 
+    color: #999;
+}
+
+/* 7. 사이드 패널 메모 이력 컴포넌트 정렬 */
+.side-panel .form-group div:first-of-type {
+    display: flex; 
+    gap: 8px; 
+    margin-bottom: 10px;
+}
+.side-panel .form-group div:first-of-type input {
+    flex: 1; 
+    margin-bottom: 0; 
+    padding: 8px; 
+    font-size: 13px; 
+    border: 1px solid #ddd; 
+    border-radius: 4px;
+}
+.side-panel .form-group div:first-of-type button {
+    width: auto; 
+    padding: 0 15px; 
+    font-size: 13px; 
+    flex-shrink: 0;
+}
+#newMemoContent {
+    height: 60px; 
+    margin-bottom: 15px; 
+    box-sizing: border-box; 
+    width: 100%; 
+    padding: 8px; 
+    font-size: 13px; 
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    resize: none;
+}
+#sideMemoList {
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    max-height: 280px; 
+    overflow-y: auto; 
+    padding-right: 5px;
+}
+
+/* 8. 사이드 패널 하단부 액션 버튼 박스 */
+.side-panel > div:last-of-type {
+    display: flex; 
+    gap: 10px; 
+    margin-top: 20px; 
+    padding-bottom: 30px;
+}
+.side-panel > div:last-of-type button {
+    flex: 1; 
+    padding: 12px;
+}
+.side-panel > div:last-of-type button:last-child {
+    background: #f1f3f5; 
+    color: #333;
+}
+
+/* 9. [신규 이식] 상담 이력 수정 전용 그래픽 모달 테마 */
+#memoEditModal .modal-content {
+    max-width: 380px; 
+    border-radius: 12px; 
+    padding: 18px; 
+    border-top: 4px solid #2d3436;
+}
+#memoEditModal h3 {
+    margin-top: 0; 
+    color: #2c3e50; 
+    font-size: 15px;
+}
+#memoEditModal hr {
+    border: 0; 
+    height: 1px; 
+    background: #eee; 
+    margin-bottom: 15px;
+}
+#memoEditModal .form-group label {
+    font-size: 12px; 
+    color: #555; 
+    font-weight: bold; 
+    display: block; 
+    margin-bottom: 5px;
+}
+#modalMemoTitle {
+    width: 100%; 
+    padding: 8px; 
+    font-size: 13px; 
+    border: 1px solid #ddd; 
+    border-radius: 6px; 
+    box-sizing: border-box;
+}
+#modalMemoContent {
+    width: 100%; 
+    height: 100px; 
+    padding: 8px; 
+    border: 1px solid #ddd; 
+    border-radius: 6px; 
+    box-sizing: border-box; 
+    font-size: 13px; 
+    resize: none; 
+    font-family: inherit;
+}
+#memoEditModal div:last-of-type {
+    display: flex; 
+    gap: 8px; 
+    margin-top: 18px;
+}
+#memoEditModal div:last-of-type button {
+    flex: 1; 
+    padding: 10px; 
+    font-size: 13px;
+}
+#memoEditModal div:last-of-type button:last-child {
+    background: #f1f3f5; 
+    color: #333;
+}
+
+/* 10. 쪽지 카드 상단부 버튼 스타일 디테일 */
+.side-memo-header button {
+    border: 1px solid transparent;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.1s ease;
+}
+.side-memo-header button:hover {
+    opacity: 0.8;
+    transform: scale(1.08);
 }
