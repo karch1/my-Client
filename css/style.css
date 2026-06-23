@@ -69,9 +69,9 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
 .filter-btn.active { background: #409eff; color: white; border-color: #409eff; }
 
 
-/* ======================================================== */
-/* 💡 사이드 패널 내 상담 히스토리 쪽지 카드 디자인 */
-/* ======================================================== */
+
+/* 사이드 패널 내 상담 히스토리 쪽지 카드 디자인 */
+
 .side-memo-card {
     background: #fffbe0;             /* 은은한 노란 메모지 색상 */
     border-top: 4px solid #ff7675;   /* 위에 마스킹 테이프 붙인 포인트 */
@@ -80,7 +80,7 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
     padding: 12px 15px;
     cursor: pointer;
     overflow: hidden;
-    max-height: 44px;                /* 닫혀있을 때 딱 제목과 날짜만 보일 높이 설정 */
+    max-height: 54px;                /* 닫혀있을 때 제목이 모바일에서 2~3줄로 늘어날 수 있도록 기본 높이 확보 */
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -93,27 +93,29 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* 클릭하여 활성화(expanded) 되었을 때 글 누락 없이 전체 다 확인 가능하도록 튜닝 */
 .side-memo-card.expanded {
-    max-height: none;                /* 💥 최대 높이 제한을 없애 장문의 상담글도 100% 노출 */
+    max-height: none;                /* 최대 높이 제한을 없애 장문의 상담글도 100% 노출 */
     transform: rotate(0.3deg);       /* 아날로그 쪽지 느낌으로 미세하게 삐뚤어짐 */
 }
 
+/* 상단 영역 배치: 수정/삭제 버튼 레이아웃 유지 체계 */
 .side-memo-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    height: 20px;
+    align-items: flex-start;         /* 🛠️ 제목이 아래로 길어져도 버튼이 상단에 고정되도록 조정 */
+    gap: 8px;
 }
 
+/* 🛠️ [핵심 수정] 모바일 화면에서 제목이 길어질 때 뒷글자가 잘리지 않고 아래로 자동 줄바꿈 처리 */
 .side-memo-title {
     font-weight: 700;
     font-size: 13px;
     margin: 0;
     color: #2d3436;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    width: 62%;                      /* 버튼 크기 확보를 위해 타이틀 너비 제한 */
+    word-break: break-all;           /* 💥 단어 단위와 상관없이 폭이 넘치면 무조건 줄바꿈 */
+    white-space: normal;             /* 💥 한 줄 제한 해제! 좁은 모바일 화면에서는 아래로 래핑됨 */
+    flex: 1;                         /* 우측 버튼 영역을 제외한 나머지 공간을 꽉 채움 */
 }
 
 /* 본문 내용이 드러나는 절취선 영역 */
