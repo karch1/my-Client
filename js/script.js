@@ -3,8 +3,8 @@
  * 파이어베이스 서버와 통신하기 위한 필수 라이브러리들입니다.
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 // [2] Firebase 프로젝트 환경 설정값
 const firebaseConfig = {
@@ -29,6 +29,7 @@ const rowsPerPage = 10; // 페이지당 표시할 고객 수
 const statuses = ['계약자', '2차성공', '약속잡음', '부재', '보류', '취소', '취소(AS)'];
 const statusPriority = { '계약자': 0, '2차성공': 1, '약속잡음': 2, '부재': 3, '보류': 4, '취소': 5, '취소(AS)': 6 }; // 상태 정렬 기준
 let currentFilter = "ALL"; // 현재 적용된 상태 필터
+let memoUnsubscribe = null; // 사이드 패널 닫을 때 쪽지 메모 실시간 구독을 해제하기 위한 변수
 
 /**
  * [5] 전역 함수 등록 (window 객체 사용)
@@ -111,21 +112,107 @@ window.addNewRow = async function() {
     } catch(e) { console.error(e); } finally { isSaving = false; } 
 };
 
-// 사이드 패널 제어
+// 사이드 패널 제어 및 실시간 서브 컬렉션 쪽지 바인딩
 window.openSidePanel = function(index) { 
     activeRowIndex = index; 
     const item = customerData[index]; 
     document.getElementById('panelTitle').innerText = `📋 ${item.name}님 상세 관리`; 
-    document.getElementById('editDate').value = item.date; document.getElementById('editName').value = item.name; document.getElementById('editPhone').value = item.phone; document.getElementById('editRegion').value = item.region; document.getElementById('editCity').value = item.city; document.getElementById('editBirth').value = item.birth; document.getElementById('editGender').value = item.gender; document.getElementById('memoInput').value = item.memo; 
+    document.getElementById('editDate').value = item.date; 
+    document.getElementById('editName').value = item.name; 
+    document.getElementById('editPhone').value = item.phone; 
+    document.getElementById('editRegion').value = item.region; 
+    document.getElementById('editCity').value = item.city; 
+    document.getElementById('editBirth').value = item.birth; 
+    document.getElementById('editGender').value = item.gender; 
+    
+    // 메모장 입력 폼 초기화 (새 패널 열 때 비워주기)
+    document.getElementById('newMemoTitle').value = '';
+    document.getElementById('newMemoContent').value = '';
+    
     selectedStatus = item.status; 
     Array.from(document.getElementById('optionList').children).forEach(opt => opt.classList.toggle('selected', opt.innerText === selectedStatus)); 
-    document.getElementById('sideOverlay').classList.add('active'); document.getElementById('sidePanel').classList.add('active'); 
-};
-window.closeSidePanel = function() { document.getElementById('sideOverlay').classList.remove('active'); document.getElementById('sidePanel').classList.remove('active'); };
+    document.getElementById('sideOverlay').classList.add('active'); 
+    document.getElementById('sidePanel').classList.add('active'); 
 
-// 수정사항 저장
+    // 이전에 동작 중이던 서브메모 리스너 구독 끊기 (메모리 관리)
+    if (memoUnsubscribe) memoUnsubscribe();
+    
+    // 선택된 고객 문서 하위의 서브 컬렉션 'memos' 접근 경로 설정
+    const memoRef = collection(db, "customers", item.id, "memos");
+    const q = query(memoRef, orderBy("createdAt", "desc")); // 생성 타임스탬프 기준 내림차순(최신순) 정렬
+    
+    // 상담 기록 실시간 감지 및 화면 반영
+    memoUnsubscribe = onSnapshot(q, (snapshot) => {
+        const memoListContainer = document.getElementById('sideMemoList');
+        memoListContainer.innerHTML = '';
+        
+        if (snapshot.empty) {
+            memoListContainer.innerHTML = '<p style="text-align:center; color:#999; font-size:12px; margin:10px 0;">등록된 상담 메모가 없습니다.</p>';
+            return;
+        }
+        
+        snapshot.forEach((doc) => {
+            const memoData = doc.data();
+            const card = document.createElement('div');
+            card.className = 'side-memo-card';
+            
+            // 쪽지 카드 툭 터치 시 위아래 펼쳐지는 애니메이션 클래스 토글
+            card.onclick = function() { this.classList.toggle('expanded'); };
+            
+            card.innerHTML = `
+                <div class="side-memo-header">
+                    <p class="side-memo-title">📌 ${memoData.title}</p>
+                    <span style="font-size:10px; color:#aaa;">${memoData.date}</span>
+                </div>
+                <div class="side-memo-content">${memoData.content}</div>
+            `;
+            memoListContainer.appendChild(card);
+        });
+    });
+};
+
+// 사이드 패널 닫기 (실시간 리스너 자원 해제)
+window.closeSidePanel = function() { 
+    document.getElementById('sideOverlay').classList.remove('active'); 
+    document.getElementById('sidePanel').classList.remove('active'); 
+    if (memoUnsubscribe) { memoUnsubscribe(); memoUnsubscribe = null; } 
+};
+
+// 신규 상담 메모 추가 함수
+window.addCustomerMemo = async function() {
+    const titleInput = document.getElementById('newMemoTitle');
+    const contentInput = document.getElementById('newMemoContent');
+    
+    if (!titleInput.value.trim() || !contentInput.value.trim()) {
+        alert('메모 제목과 내용을 모두 입력해주세요.');
+        return;
+    }
+    
+    const currentCustomerId = customerData[activeRowIndex].id;
+    const memoRef = collection(db, "customers", currentCustomerId, "memos");
+    
+    const today = new Date();
+    const dateString = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    
+    try {
+        await addDoc(memoRef, {
+            title: titleInput.value,
+            content: contentInput.value,
+            date: dateString,
+            createdAt: new Date().getTime() // 최신순 덤프 정렬용 타임스탬프
+        });
+        
+        titleInput.value = '';
+        contentInput.value = '';
+    } catch (e) {
+        console.error("메모 저장 실패:", e);
+        alert("메모를 저장하지 못했습니다.");
+    }
+};
+
+// 수정사항 저장 (오리지널 매핑 필드 유지 및 저장)
 window.saveChanges = async function() { 
-    const updatedFields = { date: document.getElementById('editDate').value, name: document.getElementById('editName').value, phone: document.getElementById('editPhone').value, region: document.getElementById('editRegion').value, city: document.getElementById('editCity').value, birth: document.getElementById('editBirth').value, gender: document.getElementById('editGender').value, memo: document.getElementById('memoInput').value, status: selectedStatus }; 
+    const updatedFields = { date: document.getElementById('editDate').value, name: document.getElementById('editName').value, phone: document.getElementById('editPhone').value, region: document.getElementById('editRegion').value, city: document.getElementById('editCity').value, birth: document.getElementById('editBirth').value, gender: document.getElementById('editGender').value, status: selectedStatus }; 
     await updateDoc(doc(db, "customers", customerData[activeRowIndex].id), updatedFields); 
     renderTable(); closeSidePanel(); 
 };
