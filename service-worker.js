@@ -1,4 +1,4 @@
-const CACHE_NAME = "db-manager-v12"; 
+const CACHE_NAME = "db-manager-v13"; 
 
 const urlsToCache = [
     "./",
