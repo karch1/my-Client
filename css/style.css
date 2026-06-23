@@ -50,3 +50,68 @@ th { background-color: #f8f9fa; color: #495057; position: sticky; top: 0; z-inde
 .filter-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 12px; transition: all 0.2s; }
 .filter-btn:hover { background: #f0f0f0; }
 .filter-btn.active { background: #409eff; color: white; border-color: #409eff; }
+
+
+/* ======================================================== */
+/* 💡 [신규 추가] 사이드 패널 내 상담 히스토리 쪽지 카드 디자인 */
+/* ======================================================== */
+.side-memo-card {
+    background: #fffbe0;             /* 은은한 노란 메모지 색상 */
+    border-top: 4px solid #ff7675;   /* 위에 마스킹 테이프 붙인 포인트 */
+    border-radius: 6px;              /* 살짝 각진 종이 느낌 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+    padding: 12px 15px;
+    cursor: pointer;
+    overflow: hidden;
+    max-height: 42px;                /* 닫혀있을 때 딱 제목과 날짜만 보일 높이 설정 */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 터치하거나 마우스 오버 시 들리는 느낌 효과 */
+.side-memo-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* 클릭하여 활성화(expanded) 되었을 때 부드럽게 늘어나는 최대 높이 지정 */
+.side-memo-card.expanded {
+    max-height: 400px;
+    transform: rotate(0.3deg);       /* 아날로그 쪽지 느낌으로 미세하게 삐뚤어짐 */
+}
+
+.side-memo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 18px;
+}
+
+.side-memo-title {
+    font-weight: 700;
+    font-size: 13px;
+    margin: 0;
+    color: #2d3436;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 75%;
+}
+
+/* 본문 내용이 드러나는 절취선 영역 */
+.side-memo-content {
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: #4a4a4a;
+    border-top: 1px dashed #e6dfb8;   /* 공책 절취 점선 */
+    padding-top: 10px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.side-memo-card.expanded .side-memo-content {
+    opacity: 1;
+}
