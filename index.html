@@ -12,40 +12,40 @@
 <body>
 
 <div class="modal-overlay" id="noticeModal">
-    <div class="modal-content">
-        <h2>📢 업무 공지</h2>
-        <div>
+    <div class="modal-content" style="border-top: 4px solid #409eff;">
+        <h2 style="margin-top:0; color:#333;">📢 업무 공지</h2>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; line-height: 1.6; font-size: 14px;">
             매월 초에 <strong>신계약 3종확인서</strong> 해야됩니다.<br>
             <strong>아이디:</strong> YF10140 | <strong>비번:</strong> mn10140*
         </div>
-        <div>
-            <label>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="cursor:pointer; font-size: 12px; color: #666;">
                 <input type="checkbox" id="hideNotice"> 오늘 하루 띄우지 않음
             </label>
-            <button class="btn add-btn" onclick="closeNotice()">확인</button>
+            <button class="btn add-btn" onclick="closeNotice()" style="flex:none; width:80px; padding:8px;">확인</button>
         </div>
     </div>
 </div>
 
 <div class="input-panel">
-    <div>DB 고객 관리</div>
+    <div style="font-weight: bold; margin-bottom: 10px; font-size: 16px;">DB 고객 관리</div>
     <div class="search-row">
-        <span>데이터 검색:</span>
+        <span style="align-self: center; font-weight: bold;">데이터 검색:</span>
         <input type="text" id="searchInput" placeholder="고객명, 전화번호, 메모 내용으로 검색..." onkeyup="currentPage=1; renderTable()">
     </div>
     <div class="input-grid">
         <input type="date" id="newDate">
         <input type="text" id="newName" placeholder="고객명">
-        <input type="text" id="newPhone" maxlength="13" oninput="formatPhone(this)" placeholder="전화번호">
+        <input type="text" id="newPhone" placeholder="전화번호" maxlength="13" oninput="formatPhone(this)">
         <input type="text" id="newRegion" placeholder="지역">
         <input type="text" id="newCity" placeholder="시도/구군">
-        <input type="text" id="newBirth" maxlength="12" oninput="formatBirth(this)" placeholder="생년월일">
+        <input type="text" id="newBirth" placeholder="생년월일" maxlength="12" oninput="formatBirth(this)">
         <select id="newGender"><option value="남">남</option><option value="여">여</option></select>
         <select id="newStatus">
             <option>약속잡음</option><option>2차성공</option><option>계약자</option>
             <option>부재</option><option>보류</option><option>취소</option><option>취소(AS)</option>
         </select>
-        <input type="text" id="newMemo" placeholder="최초 배분 메모/상담내용">
+        <input type="text" id="newMemo" placeholder="메모/상담내용" style="grid-column: span 2;">
     </div>
     <div class="filter-tab-row">
         <button class="filter-btn active" onclick="setFilter('ALL'); setActive(this)">전체</button>
@@ -56,8 +56,8 @@
         <button class="filter-btn" onclick="setFilter('보류'); setActive(this)">보류</button>
     </div>
     <div class="btn-row">
-        <button class="btn" onclick="googleLogin()">구글 로그인</button>
-        <button class="btn" onclick="logout()">로그아웃</button>
+        <button class="btn" onclick="googleLogin()" style="background:#222; color:white;">구글 로그인</button>
+        <button class="btn" onclick="logout()" style="background:#999; color:white;">로그아웃</button>
         <button class="btn add-btn" onclick="addNewRow()">새 데이터 추가</button>
     </div>
 </div>
@@ -67,23 +67,23 @@
         <thead>
             <tr>
                 <th>배분날짜 <select class="sort-select" id="dateSortSelect" onchange="sortData('date', this.value)"><option value="none">정렬</option><option value="desc">최신순 ↓</option><option value="asc">과거순 ↑</option></select></th>
-                <th>고객명</th><th>전화번호</th><th>지역</th><th>구군</th><th>생년</th><th>성별</th><th>최초 메모</th>
+                <th>고객명</th><th>전화번호</th><th>지역</th><th>구군</th><th>생년</th><th style="min-width: 50px;">성별</th><th>메모/상담내용</th>
                 <th>현황 <select class="sort-select" id="statusSortSelect" onchange="sortData('status', this.value)"><option value="none">기본</option><option value="계약자">계약자</option><option value="2차성공">2차성공</option><option value="약속잡음">약속잡음</option><option value="부재">부재</option><option value="보류">보류</option><option value="취소">취소</option><option value="취소(AS)">취소(AS)</option></select></th>
-                <th>관리</th>
+                <th style="min-width: 70px;">관리</th>
             </tr>
         </thead>
         <tbody id="tableBody"></tbody>
     </table>
 </div>
-<div id="pagination"></div>
+<div id="pagination" style="display:flex; justify-content:center; gap:6px; margin-top:15px; flex-wrap:wrap;"></div>
 
 <div class="side-overlay" id="sideOverlay" onclick="closeSidePanel()"></div>
 <div class="side-panel" id="sidePanel">
-    <div>
-        <h3 id="panelTitle">고객 상세 정보</h3>
-        <div>
-            <button onclick="deleteFromPanel()">삭제</button>
-            <button onclick="closeSidePanel()">&times;</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #f0f2f5; padding-bottom:10px;">
+        <h3 id="panelTitle" style="margin:0; color:#333; font-size:16px;">고객 상세 정보</h3>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <button onclick="deleteFromPanel()" style="background:#ff4d4f; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">삭제</button>
+            <button onclick="closeSidePanel()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#999;">&times;</button>
         </div>
     </div>
     <div class="form-group"><label>배분날짜</label><input type="date" id="editDate"></div>
@@ -94,40 +94,10 @@
     <div class="form-group"><label>생년월일</label><input type="text" id="editBirth" maxlength="12" oninput="formatBirth(this)"></div>
     <div class="form-group"><label>성별</label><select id="editGender"><option value="남">남</option><option value="여">여</option></select></div>
     <div class="form-group"><label>현황 상태</label><div class="option-list" id="optionList"></div></div>
-    
-    <div class="form-group">
-        <label>✏️ 상담 메모 히스토리 (클릭 시 펼쳐짐)</label>
-        <div>
-            <input type="text" id="newMemoTitle" placeholder="메모 제목 (예: 1차 통화, 보장분석)">
-            <button class="btn add-btn" onclick="addCustomerMemo()">메모 추가</button>
-        </div>
-        <textarea id="newMemoContent" class="memo-edit-area" placeholder="상세 상담 내용을 입력하세요"></textarea>
-        
-        <div id="sideMemoList"></div>
-    </div>
-
-    <div>
-        <button class="btn add-btn" onclick="saveChanges()">변화내역 저장</button>
-        <button class="btn" onclick="closeSidePanel()">닫기</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="memoEditModal">
-    <div class="modal-content">
-        <h3>✏️ 상담 이력 수정</h3>
-        <hr>
-        <div class="form-group">
-            <label>쪽지 제목</label>
-            <input type="text" id="modalMemoTitle">
-        </div>
-        <div class="form-group">
-            <label>상세 내용</label>
-            <textarea id="modalMemoContent"></textarea>
-        </div>
-        <div>
-            <button class="btn add-btn" id="modalSubmitBtn">완료</button>
-            <button class="btn" onclick="closeMemoModal()">취소</button>
-        </div>
+    <div class="form-group"><label>메모 / 상담내용</label><textarea id="memoInput" class="memo-edit-area"></textarea></div>
+    <div style="display: flex; gap: 10px; margin-top: 20px; padding-bottom:30px;">
+        <button class="btn add-btn" onclick="saveChanges()" style="flex:1; padding:12px;">변화내역 저장</button>
+        <button class="btn" onclick="closeSidePanel()" style="flex:1; background:#f1f3f5; color:#333; padding:12px;">닫기</button>
     </div>
 </div>
 
