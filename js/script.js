@@ -146,11 +146,21 @@ window.openSidePanel = function(index) {
         const memoListContainer = document.getElementById('sideMemoList');
         memoListContainer.innerHTML = '';
         
-        if (snapshot.empty) {
-            memoListContainer.innerHTML = '<p style="text-align:center; color:#999; font-size:12px; margin:10px 0;">등록된 상담 메모가 없습니다.</p>';
-            return;
-        }
+        // [수정 보완] 최초 배분 당시 적었던 오리지널 메모를 무조건 리스트 최상단에 고정 표시
+        const firstCard = document.createElement('div');
+        firstCard.className = 'side-memo-card';
+        firstCard.style.borderTop = '4px solid #409eff'; // 최초 메모는 파란색 테이프로 차별화
+        firstCard.onclick = function() { this.classList.toggle('expanded'); };
+        firstCard.innerHTML = `
+            <div class="side-memo-header">
+                <p class="side-memo-title">📋 [최초 배분 메모]</p>
+                <span style="font-size:10px; color:#aaa;">${item.date}</span>
+            </div>
+            <div class="side-memo-content">${item.memo || '입력된 최초 메모가 없습니다.'}</div>
+        `;
+        memoListContainer.appendChild(firstCard);
         
+        // 이후 추가된 누적 상담 이력 쪽지들 바인딩
         snapshot.forEach((doc) => {
             const memoData = doc.data();
             const card = document.createElement('div');
