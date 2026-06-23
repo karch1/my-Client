@@ -227,29 +227,49 @@ window.addCustomerMemo = async function() {
     }
 };
 
-// [신규 추가] 특정 상담 쪽지 메모 수정 로직
-window.editCustomerMemo = async function(customerId, memoId, currentTitle, currentContent) {
-    const newTitle = prompt("수정할 메모 제목을 입력하세요:", currentTitle);
-    if (newTitle === null) return; // 취소 클릭 시
+// 💡 [수정 완료] 기존 prompt() 방식을 걷어내고 HTML 커스텀 인라인 모달창 매핑으로 교체
+window.editCustomerMemo = function(customerId, memoId, currentTitle, currentContent) {
+    const modal = document.getElementById('memoEditModal');
+    const titleInput = document.getElementById('modalMemoTitle');
+    const contentInput = document.getElementById('modalMemoContent');
+    const submitBtn = document.getElementById('modalSubmitBtn');
     
-    const newContent = prompt("수정할 메모 상세 내용을 입력하세요:", currentContent);
-    if (newContent === null) return; // 취소 클릭 시
+    // 모달 인풋 필드에 현재 선택된 쪽지 내용 채워넣기
+    titleInput.value = currentTitle;
+    contentInput.value = currentContent;
     
-    if (!newTitle.trim() || !newContent.trim()) {
-        alert("제목과 내용을 모두 채워야 수정이 완료됩니다.");
-        return;
-    }
+    // 모달창 띄우기
+    modal.classList.add('active');
     
-    try {
-        const targetMemoDoc = doc(db, "customers", customerId, "memos", memoId);
-        await updateDoc(targetMemoDoc, {
-            title: newTitle.trim(),
-            content: newContent.trim()
-        });
-    } catch (e) {
-        console.error("메모 수정 에러:", e);
-        alert("메모를 수정하지 못했습니다.");
-    }
+    // 완료 버튼 클릭 이벤트 매핑 바인딩 (이전 잔여 이벤트 충돌 방지를 위해 대입 연산 사용)
+    submitBtn.onclick = async function() {
+        const newTitle = titleInput.value.trim();
+        const newContent = contentInput.value.trim();
+        
+        if (!newTitle || !newContent) {
+            alert("제목과 내용을 모두 채워야 수정이 완료됩니다.");
+            return;
+        }
+        
+        try {
+            const targetMemoDoc = doc(db, "customers", customerId, "memos", memoId);
+            await updateDoc(targetMemoDoc, {
+                title: newTitle,
+                content: newContent
+            });
+            closeMemoModal(); // 성공 시 모달창 닫기
+        } catch (e) {
+            console.error("메모 수정 에러:", e);
+            alert("메모를 수정하지 못했습니다.");
+        }
+    };
+};
+
+// 💡 쪽지 수정 모달 닫기 제어 함수 등록
+window.closeMemoModal = function() {
+    document.getElementById('memoEditModal').classList.remove('active');
+    document.getElementById('modalMemoTitle').value = '';
+    document.getElementById('modalMemoContent').value = '';
 };
 
 // [신규 추가] 특정 상담 쪽지 메모 삭제 로직
